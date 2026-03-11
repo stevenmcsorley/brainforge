@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  name        String
+  email       String       @unique
+  createdAt   DateTime     @default(now()) @map("created_at")
+  models      BrainModel[]
+  datasets    Dataset[]
+  experiments Experiment[]
+
+  @@map("users")
+}
+
+model BrainModel {
+  id                String           @id @default(uuid())
+  name              String
+  description       String?
+  version           String           @default("1.0.0")
+  regionCount       Int              @map("region_count")
+  defaultBackend    String           @default("rate_based") @map("default_backend")
+  parameters        Json?
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  userId            String?          @map("user_id")
+  connectivitySetId String?          @map("connectivity_set_id")
+  connectivitySet   ConnectivitySet? @relation(fields: [connectivitySetId], references: [id])
+  user              User?            @relation(fields: [userId], references: [id])
+  experiments       Experiment[]
+  regions           Region[]
+
+  @@map("brain_models")
+}
+
+model Region {
+  id                  String       @id @default(uuid())
+  name                String
+  abbreviation        String?
+  hemisphere          String?
+  atlasIndex          Int?         @map("atlas_index")
+  coordX              Float?       @map("coord_x")
+  coordY              Float?       @map("coord_y")
+  coordZ              Float?       @map("coord_z")
+  metadata            Json?
+  modelId             String       @map("model_id")
+  outgoingConnections Connection[] @relation("source_region")
+  incomingConnections Connection[] @relation("target_region")
+  model               BrainModel   @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@map("regions")
+}
+
+model ConnectivitySet {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+  regionCount     Int          @map("region_count")
+  connectionCount Int          @map("connection_count")
+  isDirected      Boolean      @default(true) @map("is_directed")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  models          BrainModel[]
+  connections     Connection[]
+
+  @@map("connectivity_sets")
+}
+
+model Connection {
+  id                String          @id @default(uuid())
+  weight            Float
+  delay             Float           @default(0)
+  connectionType    String          @default("excitatory") @map("connection_type")
+  sourceRegionId    String          @map("source_region_id")
+  targetRegionId    String          @map("target_region_id")
+  connectivitySetId String          @map("connectivity_set_id")
+  connectivitySet   ConnectivitySet @relation(fields: [connectivitySetId], references: [id], onDelete: Cascade)
+  sourceRegion      Region          @relation("source_region", fields: [sourceRegionId], references: [id], onDelete: Cascade)
+  targetRegion      Region          @relation("target_region", fields: [targetRegionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectivitySetId, sourceRegionId, targetRegionId])
+  @@map("connections")
+}
+
+model Dataset {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  format      String
+  source      String?
+  regionCount Int?     @map("region_count")
+  fileSize    Int?     @map("file_size")
+  checksum    String?
+  storagePath String?  @map("storage_path")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  userId      String?  @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@map("datasets")
+}
+
+model Experiment {
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  status      String          @default("draft")
+  config      Json
+  tags        String[]        @default([])
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  modelId     String          @map("model_id")
+  userId      String?         @map("user_id")
+  runs        ExperimentRun[]
+  model       BrainModel      @relation(fields: [modelId], references: [id])
+  user        User?           @relation(fields: [userId], references: [id])
+
+  @@map("experiments")
+}
+
+model ExperimentRun {
+  id           String        @id @default(uuid())
+  status       String        @default("queued")
+  progress     Float         @default(0)
+  currentStep  Int           @default(0) @map("current_step")
+  totalSteps   Int           @map("total_steps")
+  seed         Int
+  startedAt    DateTime?     @map("started_at")
+  completedAt  DateTime?     @map("completed_at")
+  error        String?
+  metadata     Json?
+  createdAt    DateTime      @default(now()) @map("created_at")
+  experimentId String        @map("experiment_id")
+  experiment   Experiment    @relation(fields: [experimentId], references: [id])
+  artifacts    RunArtifact[]
+  events       RunEvent[]
+  metrics      RunMetric[]
+
+  @@map("experiment_runs")
+}
+
+model RunArtifact {
+  id        String        @id @default(uuid())
+  type      String
+  path      String
+  sizeBytes Int?          @map("size_bytes")
+  step      Int?
+  createdAt DateTime      @default(now()) @map("created_at")
+  runId     String        @map("run_id")
+  run       ExperimentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@map("run_artifacts")
+}
+
+model RunMetric {
+  id        String        @id @default(uuid())
+  step      Int
+  timestamp Float
+  metrics   Json
+  createdAt DateTime      @default(now()) @map("created_at")
+  runId     String        @map("run_id")
+  run       ExperimentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, step])
+  @@map("run_metrics")
+}
+
+model RunEvent {
+  id        String        @id @default(uuid())
+  type      String
+  payload   Json
+  createdAt DateTime      @default(now()) @map("created_at")
+  runId     String        @map("run_id")
+  run       ExperimentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, type])
+  @@map("run_events")
+}
+
+model SimulationPreset {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  backend     String
+  config      Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("simulation_presets")
+}

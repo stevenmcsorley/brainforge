@@ -1,0 +1,19 @@
+{
+    "name": "@brainforge/ui",
+    "version": "0.1.0",
+    "private": true,
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "peerDependencies": {
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.0",
+        "@types/react": "^18.3.0"
+    }
+}

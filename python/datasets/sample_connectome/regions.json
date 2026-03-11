@@ -1,0 +1,682 @@
+[
+  {
+    "id": "r000",
+    "name": "Left Bankssts",
+    "abbreviation": "L-BSTS",
+    "hemisphere": "left",
+    "atlas_index": 0,
+    "x": -47.0,
+    "y": -42.0,
+    "z": 12.0
+  },
+  {
+    "id": "r001",
+    "name": "Left Caudalanteriorcingulate",
+    "abbreviation": "L-cACC",
+    "hemisphere": "left",
+    "atlas_index": 1,
+    "x": -6.0,
+    "y": 30.0,
+    "z": 24.0
+  },
+  {
+    "id": "r002",
+    "name": "Left Caudalmiddlefrontal",
+    "abbreviation": "L-CMF",
+    "hemisphere": "left",
+    "atlas_index": 2,
+    "x": -41.0,
+    "y": 8.0,
+    "z": 50.0
+  },
+  {
+    "id": "r003",
+    "name": "Left Cuneus",
+    "abbreviation": "L-CUN",
+    "hemisphere": "left",
+    "atlas_index": 3,
+    "x": -10.0,
+    "y": -82.0,
+    "z": 28.0
+  },
+  {
+    "id": "r004",
+    "name": "Left Entorhinal",
+    "abbreviation": "L-ENT",
+    "hemisphere": "left",
+    "atlas_index": 4,
+    "x": -27.0,
+    "y": -10.0,
+    "z": -28.0
+  },
+  {
+    "id": "r005",
+    "name": "Left Fusiform",
+    "abbreviation": "L-FUS",
+    "hemisphere": "left",
+    "atlas_index": 5,
+    "x": -38.0,
+    "y": -42.0,
+    "z": -20.0
+  },
+  {
+    "id": "r006",
+    "name": "Left Inferiorparietal",
+    "abbreviation": "L-IP",
+    "hemisphere": "left",
+    "atlas_index": 6,
+    "x": -42.0,
+    "y": -68.0,
+    "z": 36.0
+  },
+  {
+    "id": "r007",
+    "name": "Left Inferiortemporal",
+    "abbreviation": "L-IT",
+    "hemisphere": "left",
+    "atlas_index": 7,
+    "x": -54.0,
+    "y": -22.0,
+    "z": -24.0
+  },
+  {
+    "id": "r008",
+    "name": "Left Isthmuscingulate",
+    "abbreviation": "L-iCC",
+    "hemisphere": "left",
+    "atlas_index": 8,
+    "x": -8.0,
+    "y": -48.0,
+    "z": 22.0
+  },
+  {
+    "id": "r009",
+    "name": "Left Lateraloccipital",
+    "abbreviation": "L-LOG",
+    "hemisphere": "left",
+    "atlas_index": 9,
+    "x": -36.0,
+    "y": -82.0,
+    "z": 12.0
+  },
+  {
+    "id": "r010",
+    "name": "Left Lateralorbitofrontal",
+    "abbreviation": "L-LOF",
+    "hemisphere": "left",
+    "atlas_index": 10,
+    "x": -36.0,
+    "y": 40.0,
+    "z": -16.0
+  },
+  {
+    "id": "r011",
+    "name": "Left Lingual",
+    "abbreviation": "L-LIN",
+    "hemisphere": "left",
+    "atlas_index": 11,
+    "x": -14.0,
+    "y": -68.0,
+    "z": 4.0
+  },
+  {
+    "id": "r012",
+    "name": "Left Medialorbitofrontal",
+    "abbreviation": "L-MOF",
+    "hemisphere": "left",
+    "atlas_index": 12,
+    "x": -6.0,
+    "y": 48.0,
+    "z": -14.0
+  },
+  {
+    "id": "r013",
+    "name": "Left Middletemporal",
+    "abbreviation": "L-MT",
+    "hemisphere": "left",
+    "atlas_index": 13,
+    "x": -56.0,
+    "y": -20.0,
+    "z": -14.0
+  },
+  {
+    "id": "r014",
+    "name": "Left Parahippocampal",
+    "abbreviation": "L-PHC",
+    "hemisphere": "left",
+    "atlas_index": 14,
+    "x": -26.0,
+    "y": -36.0,
+    "z": -18.0
+  },
+  {
+    "id": "r015",
+    "name": "Left Paracentral",
+    "abbreviation": "L-PAR",
+    "hemisphere": "left",
+    "atlas_index": 15,
+    "x": -8.0,
+    "y": -36.0,
+    "z": 68.0
+  },
+  {
+    "id": "r016",
+    "name": "Left Parsopercularis",
+    "abbreviation": "L-POP",
+    "hemisphere": "left",
+    "atlas_index": 16,
+    "x": -46.0,
+    "y": 12.0,
+    "z": 26.0
+  },
+  {
+    "id": "r017",
+    "name": "Left Parsorbitalis",
+    "abbreviation": "L-POB",
+    "hemisphere": "left",
+    "atlas_index": 17,
+    "x": -38.0,
+    "y": 44.0,
+    "z": -16.0
+  },
+  {
+    "id": "r018",
+    "name": "Left Parstriangularis",
+    "abbreviation": "L-PTR",
+    "hemisphere": "left",
+    "atlas_index": 18,
+    "x": -46.0,
+    "y": 26.0,
+    "z": 14.0
+  },
+  {
+    "id": "r019",
+    "name": "Left Pericalcarine",
+    "abbreviation": "L-PCA",
+    "hemisphere": "left",
+    "atlas_index": 19,
+    "x": -8.0,
+    "y": -80.0,
+    "z": 4.0
+  },
+  {
+    "id": "r020",
+    "name": "Left Postcentral",
+    "abbreviation": "L-PSC",
+    "hemisphere": "left",
+    "atlas_index": 20,
+    "x": -42.0,
+    "y": -26.0,
+    "z": 52.0
+  },
+  {
+    "id": "r021",
+    "name": "Left Posteriorcingulate",
+    "abbreviation": "L-PCC",
+    "hemisphere": "left",
+    "atlas_index": 21,
+    "x": -8.0,
+    "y": -52.0,
+    "z": 28.0
+  },
+  {
+    "id": "r022",
+    "name": "Left Precentral",
+    "abbreviation": "L-PRC",
+    "hemisphere": "left",
+    "atlas_index": 22,
+    "x": -42.0,
+    "y": -10.0,
+    "z": 56.0
+  },
+  {
+    "id": "r023",
+    "name": "Left Precuneus",
+    "abbreviation": "L-PREC",
+    "hemisphere": "left",
+    "atlas_index": 23,
+    "x": -8.0,
+    "y": -64.0,
+    "z": 42.0
+  },
+  {
+    "id": "r024",
+    "name": "Left Rostralanteriorcingulate",
+    "abbreviation": "L-rACC",
+    "hemisphere": "left",
+    "atlas_index": 24,
+    "x": -6.0,
+    "y": 34.0,
+    "z": 12.0
+  },
+  {
+    "id": "r025",
+    "name": "Left Rostralmiddlefrontal",
+    "abbreviation": "L-RMF",
+    "hemisphere": "left",
+    "atlas_index": 25,
+    "x": -26.0,
+    "y": 38.0,
+    "z": 38.0
+  },
+  {
+    "id": "r026",
+    "name": "Left Superiorfrontal",
+    "abbreviation": "L-SF",
+    "hemisphere": "left",
+    "atlas_index": 26,
+    "x": -14.0,
+    "y": 34.0,
+    "z": 50.0
+  },
+  {
+    "id": "r027",
+    "name": "Left Superiorparietal",
+    "abbreviation": "L-SP",
+    "hemisphere": "left",
+    "atlas_index": 27,
+    "x": -30.0,
+    "y": -60.0,
+    "z": 50.0
+  },
+  {
+    "id": "r028",
+    "name": "Left Superiortemporal",
+    "abbreviation": "L-ST",
+    "hemisphere": "left",
+    "atlas_index": 28,
+    "x": -60.0,
+    "y": -16.0,
+    "z": 0.0
+  },
+  {
+    "id": "r029",
+    "name": "Left Supramarginal",
+    "abbreviation": "L-SMG",
+    "hemisphere": "left",
+    "atlas_index": 29,
+    "x": -60.0,
+    "y": -40.0,
+    "z": 36.0
+  },
+  {
+    "id": "r030",
+    "name": "Left Frontalpole",
+    "abbreviation": "L-FP",
+    "hemisphere": "left",
+    "atlas_index": 30,
+    "x": -2.0,
+    "y": 60.0,
+    "z": -6.0
+  },
+  {
+    "id": "r031",
+    "name": "Left Temporalpole",
+    "abbreviation": "L-TP",
+    "hemisphere": "left",
+    "atlas_index": 31,
+    "x": -38.0,
+    "y": 8.0,
+    "z": -38.0
+  },
+  {
+    "id": "r032",
+    "name": "Left Transversetemporal",
+    "abbreviation": "L-TT",
+    "hemisphere": "left",
+    "atlas_index": 32,
+    "x": -46.0,
+    "y": -20.0,
+    "z": 10.0
+  },
+  {
+    "id": "r033",
+    "name": "Left Insula",
+    "abbreviation": "L-INS",
+    "hemisphere": "left",
+    "atlas_index": 33,
+    "x": -36.0,
+    "y": -8.0,
+    "z": 4.0
+  },
+  {
+    "id": "r034",
+    "name": "Right Bankssts",
+    "abbreviation": "R-BSTS",
+    "hemisphere": "right",
+    "atlas_index": 34,
+    "x": 47.0,
+    "y": -42.0,
+    "z": 12.0
+  },
+  {
+    "id": "r035",
+    "name": "Right Caudalanteriorcingulate",
+    "abbreviation": "R-cACC",
+    "hemisphere": "right",
+    "atlas_index": 35,
+    "x": 6.0,
+    "y": 30.0,
+    "z": 24.0
+  },
+  {
+    "id": "r036",
+    "name": "Right Caudalmiddlefrontal",
+    "abbreviation": "R-CMF",
+    "hemisphere": "right",
+    "atlas_index": 36,
+    "x": 41.0,
+    "y": 8.0,
+    "z": 50.0
+  },
+  {
+    "id": "r037",
+    "name": "Right Cuneus",
+    "abbreviation": "R-CUN",
+    "hemisphere": "right",
+    "atlas_index": 37,
+    "x": 10.0,
+    "y": -82.0,
+    "z": 28.0
+  },
+  {
+    "id": "r038",
+    "name": "Right Entorhinal",
+    "abbreviation": "R-ENT",
+    "hemisphere": "right",
+    "atlas_index": 38,
+    "x": 27.0,
+    "y": -10.0,
+    "z": -28.0
+  },
+  {
+    "id": "r039",
+    "name": "Right Fusiform",
+    "abbreviation": "R-FUS",
+    "hemisphere": "right",
+    "atlas_index": 39,
+    "x": 38.0,
+    "y": -42.0,
+    "z": -20.0
+  },
+  {
+    "id": "r040",
+    "name": "Right Inferiorparietal",
+    "abbreviation": "R-IP",
+    "hemisphere": "right",
+    "atlas_index": 40,
+    "x": 42.0,
+    "y": -68.0,
+    "z": 36.0
+  },
+  {
+    "id": "r041",
+    "name": "Right Inferiortemporal",
+    "abbreviation": "R-IT",
+    "hemisphere": "right",
+    "atlas_index": 41,
+    "x": 54.0,
+    "y": -22.0,
+    "z": -24.0
+  },
+  {
+    "id": "r042",
+    "name": "Right Isthmuscingulate",
+    "abbreviation": "R-iCC",
+    "hemisphere": "right",
+    "atlas_index": 42,
+    "x": 8.0,
+    "y": -48.0,
+    "z": 22.0
+  },
+  {
+    "id": "r043",
+    "name": "Right Lateraloccipital",
+    "abbreviation": "R-LOG",
+    "hemisphere": "right",
+    "atlas_index": 43,
+    "x": 36.0,
+    "y": -82.0,
+    "z": 12.0
+  },
+  {
+    "id": "r044",
+    "name": "Right Lateralorbitofrontal",
+    "abbreviation": "R-LOF",
+    "hemisphere": "right",
+    "atlas_index": 44,
+    "x": 36.0,
+    "y": 40.0,
+    "z": -16.0
+  },
+  {
+    "id": "r045",
+    "name": "Right Lingual",
+    "abbreviation": "R-LIN",
+    "hemisphere": "right",
+    "atlas_index": 45,
+    "x": 14.0,
+    "y": -68.0,
+    "z": 4.0
+  },
+  {
+    "id": "r046",
+    "name": "Right Medialorbitofrontal",
+    "abbreviation": "R-MOF",
+    "hemisphere": "right",
+    "atlas_index": 46,
+    "x": 6.0,
+    "y": 48.0,
+    "z": -14.0
+  },
+  {
+    "id": "r047",
+    "name": "Right Middletemporal",
+    "abbreviation": "R-MT",
+    "hemisphere": "right",
+    "atlas_index": 47,
+    "x": 56.0,
+    "y": -20.0,
+    "z": -14.0
+  },
+  {
+    "id": "r048",
+    "name": "Right Parahippocampal",
+    "abbreviation": "R-PHC",
+    "hemisphere": "right",
+    "atlas_index": 48,
+    "x": 26.0,
+    "y": -36.0,
+    "z": -18.0
+  },
+  {
+    "id": "r049",
+    "name": "Right Paracentral",
+    "abbreviation": "R-PAR",
+    "hemisphere": "right",
+    "atlas_index": 49,
+    "x": 8.0,
+    "y": -36.0,
+    "z": 68.0
+  },
+  {
+    "id": "r050",
+    "name": "Right Parsopercularis",
+    "abbreviation": "R-POP",
+    "hemisphere": "right",
+    "atlas_index": 50,
+    "x": 46.0,
+    "y": 12.0,
+    "z": 26.0
+  },
+  {
+    "id": "r051",
+    "name": "Right Parsorbitalis",
+    "abbreviation": "R-POB",
+    "hemisphere": "right",
+    "atlas_index": 51,
+    "x": 38.0,
+    "y": 44.0,
+    "z": -16.0
+  },
+  {
+    "id": "r052",
+    "name": "Right Parstriangularis",
+    "abbreviation": "R-PTR",
+    "hemisphere": "right",
+    "atlas_index": 52,
+    "x": 46.0,
+    "y": 26.0,
+    "z": 14.0
+  },
+  {
+    "id": "r053",
+    "name": "Right Pericalcarine",
+    "abbreviation": "R-PCA",
+    "hemisphere": "right",
+    "atlas_index": 53,
+    "x": 8.0,
+    "y": -80.0,
+    "z": 4.0
+  },
+  {
+    "id": "r054",
+    "name": "Right Postcentral",
+    "abbreviation": "R-PSC",
+    "hemisphere": "right",
+    "atlas_index": 54,
+    "x": 42.0,
+    "y": -26.0,
+    "z": 52.0
+  },
+  {
+    "id": "r055",
+    "name": "Right Posteriorcingulate",
+    "abbreviation": "R-PCC",
+    "hemisphere": "right",
+    "atlas_index": 55,
+    "x": 8.0,
+    "y": -52.0,
+    "z": 28.0
+  },
+  {
+    "id": "r056",
+    "name": "Right Precentral",
+    "abbreviation": "R-PRC",
+    "hemisphere": "right",
+    "atlas_index": 56,
+    "x": 42.0,
+    "y": -10.0,
+    "z": 56.0
+  },
+  {
+    "id": "r057",
+    "name": "Right Precuneus",
+    "abbreviation": "R-PREC",
+    "hemisphere": "right",
+    "atlas_index": 57,
+    "x": 8.0,
+    "y": -64.0,
+    "z": 42.0
+  },
+  {
+    "id": "r058",
+    "name": "Right Rostralanteriorcingulate",
+    "abbreviation": "R-rACC",
+    "hemisphere": "right",
+    "atlas_index": 58,
+    "x": 6.0,
+    "y": 34.0,
+    "z": 12.0
+  },
+  {
+    "id": "r059",
+    "name": "Right Rostralmiddlefrontal",
+    "abbreviation": "R-RMF",
+    "hemisphere": "right",
+    "atlas_index": 59,
+    "x": 26.0,
+    "y": 38.0,
+    "z": 38.0
+  },
+  {
+    "id": "r060",
+    "name": "Right Superiorfrontal",
+    "abbreviation": "R-SF",
+    "hemisphere": "right",
+    "atlas_index": 60,
+    "x": 14.0,
+    "y": 34.0,
+    "z": 50.0
+  },
+  {
+    "id": "r061",
+    "name": "Right Superiorparietal",
+    "abbreviation": "R-SP",
+    "hemisphere": "right",
+    "atlas_index": 61,
+    "x": 30.0,
+    "y": -60.0,
+    "z": 50.0
+  },
+  {
+    "id": "r062",
+    "name": "Right Superiortemporal",
+    "abbreviation": "R-ST",
+    "hemisphere": "right",
+    "atlas_index": 62,
+    "x": 60.0,
+    "y": -16.0,
+    "z": 0.0
+  },
+  {
+    "id": "r063",
+    "name": "Right Supramarginal",
+    "abbreviation": "R-SMG",
+    "hemisphere": "right",
+    "atlas_index": 63,
+    "x": 60.0,
+    "y": -40.0,
+    "z": 36.0
+  },
+  {
+    "id": "r064",
+    "name": "Right Frontalpole",
+    "abbreviation": "R-FP",
+    "hemisphere": "right",
+    "atlas_index": 64,
+    "x": 2.0,
+    "y": 60.0,
+    "z": -6.0
+  },
+  {
+    "id": "r065",
+    "name": "Right Temporalpole",
+    "abbreviation": "R-TP",
+    "hemisphere": "right",
+    "atlas_index": 65,
+    "x": 38.0,
+    "y": 8.0,
+    "z": -38.0
+  },
+  {
+    "id": "r066",
+    "name": "Right Transversetemporal",
+    "abbreviation": "R-TT",
+    "hemisphere": "right",
+    "atlas_index": 66,
+    "x": 46.0,
+    "y": -20.0,
+    "z": 10.0
+  },
+  {
+    "id": "r067",
+    "name": "Right Insula",
+    "abbreviation": "R-INS",
+    "hemisphere": "right",
+    "atlas_index": 67,
+    "x": 36.0,
+    "y": -8.0,
+    "z": 4.0
+  }
+]

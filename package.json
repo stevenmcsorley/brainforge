@@ -1,0 +1,19 @@
+{
+  "name": "brainforge",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "docker compose up",
+    "dev:web": "npm -w apps/web run dev",
+    "dev:api": "npm -w apps/api run start:dev",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

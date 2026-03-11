@@ -1,0 +1,92 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-brainforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brainforge_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-brainforge}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brainforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://brainforge:brainforge_dev@postgres:5432/brainforge
+      REDIS_URL: redis://redis:6379
+      API_PORT: "3001"
+      API_HOST: "0.0.0.0"
+      CORS_ORIGIN: "http://localhost:5173"
+      NODE_ENV: development
+    # Run migrations + seed, then start the API
+    command: >
+      sh -c "npx prisma generate &&
+             npx prisma migrate deploy &&
+             npx prisma db seed &&
+             node dist/main"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/admin/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  sim-worker:
+    build:
+      context: .
+      dockerfile: infra/docker/sim-worker.Dockerfile
+    environment:
+      SIM_WORKER_REDIS_URL: redis://redis:6379
+      SIM_WORKER_API_URL: http://api:3001
+      SIM_WORKER_STORAGE_PATH: /storage
+    volumes:
+      - sim-storage:/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3001
+        VITE_WS_URL: http://localhost:3001
+    ports:
+      - "5173:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  sim-storage:
