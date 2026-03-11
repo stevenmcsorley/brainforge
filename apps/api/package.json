@@ -12,7 +12,7 @@
     "test": "jest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts && tsx ../../scripts/seed-models.ts && tsx scripts/create_mouse_experiment.ts && tsx scripts/create_long_mouse_experiment.ts && tsx scripts/create_schaefer_experiments.ts",
+    "prisma:seed": "tsx prisma/seed.ts && tsx ../../scripts/seed-models.ts && tsx scripts/seed_large_models.ts && tsx scripts/create_mouse_experiment.ts && tsx scripts/create_long_mouse_experiment.ts && tsx scripts/create_schaefer_experiments.ts && tsx scripts/create_100_experiments.ts",
     "db:setup": "npm run prisma:generate && npm run prisma:migrate && npm run prisma:seed"
   },
   "dependencies": {
@@ -35,7 +35,7 @@
     "zod": "^3.22.0"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts && tsx ../../scripts/seed-models.ts && tsx scripts/create_mouse_experiment.ts && tsx scripts/create_long_mouse_experiment.ts && tsx scripts/create_schaefer_experiments.ts"
+    "seed": "tsx prisma/seed.ts && tsx ../../scripts/seed-models.ts && tsx scripts/seed_large_models.ts && tsx scripts/create_mouse_experiment.ts && tsx scripts/create_long_mouse_experiment.ts && tsx scripts/create_schaefer_experiments.ts && tsx scripts/create_100_experiments.ts"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.0",
