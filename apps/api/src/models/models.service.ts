@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../common/prisma.service';
 import type { CreateBrainModel, UpdateBrainModel } from '@brainforge/contracts';
+
+/** Rows per createMany call during model import. */
+const IMPORT_CHUNK_SIZE = 10_000;
 
 @Injectable()
 export class ModelsService {
@@ -71,44 +75,47 @@ export class ModelsService {
   ) {
     const model = await this.findOne(modelId);
 
+    // IDs are generated up front so regions can be inserted with createMany —
+    // which does not return created rows — while still letting us map atlas
+    // index to region id for the connection pass.
+    const regionRows = regions.map((r, i) => ({
+      id: randomUUID(),
+      name: r.name,
+      abbreviation: r.abbreviation,
+      hemisphere: r.hemisphere,
+      atlasIndex: r.atlasIndex ?? i,
+      coordX: r.coordX,
+      coordY: r.coordY,
+      coordZ: r.coordZ,
+      modelId,
+    }));
+
+    const regionByIndex = new Map(regionRows.map((r) => [r.atlasIndex, r.id]));
+    const validConnections = connections.filter(
+      (c) => regionByIndex.has(c.sourceIndex) && regionByIndex.has(c.targetIndex),
+    );
+
     return this.prisma.$transaction(async (tx: any) => {
       // 1. Create a connectivity set
       const connSet = await tx.connectivitySet.create({
         data: {
           name: `${model.name} Connectivity`,
           regionCount: regions.length,
-          connectionCount: connections.length,
+          connectionCount: validConnections.length,
           isDirected: true,
         },
       });
 
       // 2. Bulk-create regions
-      const createdRegions = await Promise.all(
-        regions.map((r, i) =>
-          tx.region.create({
-            data: {
-              name: r.name,
-              abbreviation: r.abbreviation,
-              hemisphere: r.hemisphere,
-              atlasIndex: r.atlasIndex ?? i,
-              coordX: r.coordX,
-              coordY: r.coordY,
-              coordZ: r.coordZ,
-              modelId,
-            },
-          }),
-        ),
-      );
+      for (let i = 0; i < regionRows.length; i += IMPORT_CHUNK_SIZE) {
+        await tx.region.createMany({
+          data: regionRows.slice(i, i + IMPORT_CHUNK_SIZE),
+        });
+      }
 
       // 3. Bulk-create connections (by atlas index)
-      const regionByIndex = new Map(createdRegions.map((r) => [r.atlasIndex!, r.id]));
-      const validConnections = connections.filter(
-        (c) => regionByIndex.has(c.sourceIndex) && regionByIndex.has(c.targetIndex),
-      );
-
-      const chunkSize = 10000;
-      for (let i = 0; i < validConnections.length; i += chunkSize) {
-        const chunk = validConnections.slice(i, i + chunkSize);
+      for (let i = 0; i < validConnections.length; i += IMPORT_CHUNK_SIZE) {
+        const chunk = validConnections.slice(i, i + IMPORT_CHUNK_SIZE);
         await tx.connection.createMany({
           data: chunk.map((c) => ({
             sourceRegionId: regionByIndex.get(c.sourceIndex)!,
@@ -125,14 +132,14 @@ export class ModelsService {
       await tx.brainModel.update({
         where: { id: modelId },
         data: {
-          regionCount: createdRegions.length,
+          regionCount: regionRows.length,
           connectivitySetId: connSet.id,
         },
       });
 
       return {
         modelId,
-        regionsCreated: createdRegions.length,
+        regionsCreated: regionRows.length,
         connectionsCreated: validConnections.length,
         connectivitySetId: connSet.id,
       };
