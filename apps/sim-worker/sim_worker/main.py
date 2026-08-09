@@ -377,9 +377,16 @@ class SimWorker:
             pubsub = sub_client.pubsub()
             pubsub.subscribe(channel)
             try:
-                for message in pubsub.listen():
-                    if not self.running or self.current_runner is None:
-                        break
+                # Poll with a timeout rather than blocking in listen(): a run that
+                # ends without further messages on this channel would otherwise
+                # park the thread forever, leaking a connection and subscription
+                # per run.
+                while self.running and self.current_runner is not None:
+                    message = pubsub.get_message(
+                        ignore_subscribe_messages=True, timeout=1.0
+                    )
+                    if message is None:
+                        continue
                     if message["type"] != "message":
                         continue
                     try:
