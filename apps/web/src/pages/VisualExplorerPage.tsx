@@ -4,6 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { api } from '@/lib/api';
+import type { ConnectionRow } from '@/lib/wire';
 
 // ─── Individual region node — small faceted icosahedron with emissive glow ──
 function NeuronNode({
@@ -90,7 +91,7 @@ function ConnectivityEdges({
   threshold,
 }: {
   regionNodes: Map<string, { pos: [number, number, number]; hemisphere: string }>;
-  connections: any[];
+  connections: ConnectionRow[];
   threshold: number;
 }) {
   // Only render edges above the weight threshold, subsample for performance
@@ -140,7 +141,7 @@ export function VisualExplorerPage() {
     queryKey: ['models'],
     queryFn: () => api.getModels(),
   });
-  const models: any[] = (modelsData as any)?.items ?? [];
+  const models = modelsData?.items ?? [];
   const activeModel = models.find((m) => m.id === selectedModelId) ?? models[0];
   const modelId = activeModel?.id ?? null;
 
@@ -167,10 +168,10 @@ export function VisualExplorerPage() {
   const regionNodes = useMemo(() => {
     const map = new Map<string, { pos: [number, number, number]; hemisphere: string }>();
     if (!regions) return map;
-    for (const r of regions as any[]) {
+    for (const r of regions) {
       map.set(r.id, {
         pos: [(r.coordX || 0) * 0.5, (r.coordZ || 0) * 0.5, (r.coordY || 0) * 0.5],
-        hemisphere: r.hemisphere,
+        hemisphere: r.hemisphere ?? 'midline',
       });
     }
     return map;
@@ -179,7 +180,7 @@ export function VisualExplorerPage() {
   // Visible nodes after hemisphere filter
   const visibleRegions = useMemo(() => {
     if (!regions) return [];
-    return (regions as any[]).filter((r) =>
+    return regions.filter((r) =>
       hemisphereFilter === 'both' ? true : r.hemisphere === hemisphereFilter,
     );
   }, [regions, hemisphereFilter]);
@@ -202,7 +203,7 @@ export function VisualExplorerPage() {
             3D connectome — orbit to rotate · scroll to zoom · hover to inspect
             {activeModel && (
               <span className="ml-2 text-text-muted">
-                · {visibleRegions.length} regions{(connections as any[])?.length ? ` · ${(connections as any[]).filter((c: any) => c.weight >= weightThreshold).length} edges` : ''}
+                · {visibleRegions.length} regions{connections?.length ? ` · ${connections.filter((c) => c.weight >= weightThreshold).length} edges` : ''}
               </span>
             )}
           </p>
@@ -282,13 +283,13 @@ export function VisualExplorerPage() {
             {showEdges && connections && (
               <ConnectivityEdges
                 regionNodes={regionNodes}
-                connections={connections as any[]}
+                connections={connections ?? []}
                 threshold={weightThreshold}
               />
             )}
 
             {/* Region nodes */}
-            {visibleRegions.map((r: any) => {
+            {visibleRegions.map((r) => {
               const node = regionNodes.get(r.id);
               if (!node) return null;
               return (
@@ -339,7 +340,7 @@ export function VisualExplorerPage() {
                 <span>Strong connection</span>
               </div>
               <span className="ml-auto text-text-muted/60">
-                {(connections as any[])?.filter((c: any) => c.weight >= weightThreshold).length ?? 0} edges shown
+                {connections?.filter((c) => c.weight >= weightThreshold).length ?? 0} edges shown
               </span>
             </>
           )}

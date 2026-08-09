@@ -44,16 +44,16 @@ export function ModelDetailPage() {
   const { matrix, maxWeight, regionList } = useMemo(() => {
     if (!regions || !connections) return { matrix: [], maxWeight: 0, regionList: [] };
 
-    const sorted = [...regions].sort((a: any, b: any) =>
+    const sorted = [...regions].sort((a, b) =>
       (a.atlasIndex ?? 0) - (b.atlasIndex ?? 0)
     );
     const n = sorted.length;
     const idxMap: Record<string, number> = {};
-    sorted.forEach((r: any, i: number) => { idxMap[r.id] = i; });
+    sorted.forEach((r, i) => { idxMap[r.id] = i; });
 
     const m: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
     let max = 0;
-    for (const conn of (connections as any[])) {
+    for (const conn of connections) {
       const si = idxMap[conn.sourceRegionId];
       const ti = idxMap[conn.targetRegionId];
       if (si !== undefined && ti !== undefined) {
@@ -140,14 +140,14 @@ export function ModelDetailPage() {
               </thead>
               <tbody>
                 {[...regions]
-                  .sort((a: any, b: any) => (a.atlasIndex ?? 0) - (b.atlasIndex ?? 0))
-                  .map((r: any) => (
+                  .sort((a, b) => (a.atlasIndex ?? 0) - (b.atlasIndex ?? 0))
+                  .map((r) => (
                     <tr key={r.id} className="border-b border-border/40 hover:bg-bg-tertiary">
                       <td className="px-4 py-1.5 font-mono text-text-muted text-xs">{r.atlasIndex}</td>
                       <td className="px-4 py-1.5">{r.name}</td>
                       <td className="px-4 py-1.5 text-text-secondary capitalize">{r.hemisphere || '—'}</td>
                       <td className="px-4 py-1.5 font-mono text-xs text-text-muted">
-                        {r.coordX != null
+                        {r.coordX != null && r.coordY != null && r.coordZ != null
                           ? `(${r.coordX.toFixed(1)}, ${r.coordY.toFixed(1)}, ${r.coordZ.toFixed(1)})`
                           : '—'}
                       </td>
@@ -214,7 +214,7 @@ export function ModelDetailPage() {
                 </div>
 
                 <p className="text-xs text-text-muted mt-3">
-                  {n}×{n} matrix — {(connections as any[])?.length ?? 0} non-zero connections.
+                  {n}×{n} matrix — {connections?.length ?? 0} non-zero connections.
                   Hover cells for region names and weight values.
                 </p>
               </>

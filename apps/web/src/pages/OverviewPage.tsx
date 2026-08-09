@@ -41,7 +41,7 @@ export function OverviewPage() {
     { label: 'Simulation Runs', value: stats?.runs ?? '—', icon: Activity, color: 'text-accent-amber', href: '/experiments' },
   ];
 
-  const experiments: any[] = experimentsData?.items ?? [];
+  const experiments = experimentsData?.items ?? [];
 
   return (
     <div className="space-y-6">
@@ -159,7 +159,7 @@ export function OverviewPage() {
             </button>
           </div>
           <div className="divide-y divide-border/50">
-            {experiments.map((exp: any) => (
+            {experiments.map((exp) => (
               <div
                 key={exp.id}
                 className="flex items-center justify-between px-4 py-3 hover:bg-bg-tertiary cursor-pointer transition-colors"
@@ -173,9 +173,9 @@ export function OverviewPage() {
                   <div>
                     <p className="text-sm font-medium">{exp.name}</p>
                     <p className="text-xs text-text-muted mt-0.5">
-                      {(exp.config as any)?.backend ?? 'rate_based'} ·{' '}
-                      {(exp.config as any)?.duration ?? 1}s ·{' '}
-                      {(exp.config as any)?.dt ?? 0.001}s dt
+                      {exp.config?.backend ?? 'rate_based'} ·{' '}
+                      {exp.config?.duration ?? 1}s ·{' '}
+                      {exp.config?.dt ?? 0.001}s dt
                     </p>
                   </div>
                 </div>

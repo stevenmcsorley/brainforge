@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import type { ExperimentRow } from '@/lib/wire';
 import { cn } from '@/lib/cn';
 import { Play, Activity, Clock, Hash, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { CreateExperimentModal } from './ExperimentsPage';
@@ -19,7 +20,7 @@ const STATUS_META: Record<string, { label: string; cls: string; icon: React.Elem
 export function ExperimentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [modalState, setModalState] = useState<{ mode: 'edit' | 'copy'; data: any } | null>(null);
+  const [modalState, setModalState] = useState<{ mode: 'edit' | 'copy'; data: ExperimentRow } | null>(null);
   const queryClient = useQueryClient();
 
   const { data: experiment, isLoading } = useQuery({
@@ -52,8 +53,8 @@ export function ExperimentDetailPage() {
     return <div className="text-sm text-text-muted">Experiment not found</div>;
   }
 
-  const config = (experiment.config as Record<string, any>) || {};
-  const runs: any[] = runsData?.items ?? [];
+  const config = experiment.config;
+  const runs = runsData?.items ?? [];
   const totalSteps = Math.ceil((config.duration || 1) / (config.dt || 0.001));
 
   return (
@@ -159,7 +160,7 @@ export function ExperimentDetailPage() {
             <p className="text-sm text-text-muted animate-pulse">Loading runs…</p>
           ) : runs.length > 0 ? (
             <div className="space-y-1.5">
-              {runs.map((run: any) => {
+              {runs.map((run) => {
                 const meta = STATUS_META[run.status] ?? STATUS_META.queued;
                 const StatusIcon = meta.icon;
                 const progress = (run.progress ?? 0) * 100;

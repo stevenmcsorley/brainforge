@@ -21,7 +21,7 @@ export function DatasetsPage() {
         <div className="text-sm text-text-muted">Loading...</div>
       ) : (
         <div className="grid gap-3">
-          {data?.items?.map((ds: any) => (
+          {data?.items?.map((ds) => (
             <div key={ds.id} className="card card-body">
               <div className="flex items-start gap-3">
                 <Database className="w-5 h-5 text-accent-purple mt-0.5" />

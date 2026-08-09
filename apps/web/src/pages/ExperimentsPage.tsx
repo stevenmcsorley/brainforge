@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
+import type { ExperimentRow, SimulationBackend } from '@/lib/wire';
 import { FlaskConical, Plus, X, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -22,7 +23,7 @@ export function CreateExperimentModal({
   mode = 'create'
 }: {
   onClose: () => void;
-  initialData?: any;
+  initialData?: ExperimentRow;
   mode?: 'create' | 'edit' | 'copy';
 }) {
   const qc = useQueryClient();
@@ -30,7 +31,7 @@ export function CreateExperimentModal({
     queryKey: ['models'],
     queryFn: () => api.getModels(1, 50),
   });
-  const models: any[] = modelsData?.items ?? [];
+  const models = modelsData?.items ?? [];
 
   const [form, setForm] = useState(() => {
     if (initialData) {
@@ -40,7 +41,7 @@ export function CreateExperimentModal({
         name: mode === 'copy' ? `${initialData.name} (Copy)` : initialData.name,
         description: initialData.description || '',
         modelId: initialData.modelId || '',
-        backend: config.backend || 'rate_based',
+        backend: (config.backend || 'rate_based') as SimulationBackend,
         duration: config.duration || 2.0,
         dt: config.dt || 0.001,
         seed: config.seed || 42,
@@ -56,7 +57,7 @@ export function CreateExperimentModal({
       name: '',
       description: '',
       modelId: '',
-      backend: 'rate_based',
+      backend: 'rate_based' as SimulationBackend,
       duration: 2.0,
       dt: 0.001,
       seed: 42,
@@ -75,7 +76,7 @@ export function CreateExperimentModal({
         name: form.name,
         description: form.description,
         modelId: form.modelId,
-        status: mode === 'edit' ? initialData.status : 'draft',
+        status: mode === 'edit' ? initialData?.status ?? 'draft' : 'draft',
         config: {
           backend: form.backend,
           duration: Number(form.duration),
@@ -158,7 +159,7 @@ export function CreateExperimentModal({
               onChange={(e) => set('modelId', e.target.value)}
             >
               <option value="">Select a model…</option>
-              {models.map((m: any) => (
+              {models.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name} ({m.regionCount} regions)
                 </option>
@@ -293,7 +294,7 @@ export function ExperimentsPage() {
     refetchInterval: 10_000,
   });
 
-  const experiments: any[] = data?.items ?? [];
+  const experiments = data?.items ?? [];
   const filtered =
     filter === 'all' ? experiments : experiments.filter((e) => e.status === filter);
 
@@ -364,7 +365,7 @@ export function ExperimentsPage() {
         </div>
       ) : (
         <div className="grid gap-3">
-          {filtered.map((exp: any) => (
+          {filtered.map((exp) => (
             <div
               key={exp.id}
               className="card card-body cursor-pointer hover:border-border-hover transition-all group"

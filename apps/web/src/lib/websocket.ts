@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import type { TelemetryEvent } from './wire';
 
 const WS_URL = import.meta.env.VITE_WS_URL || window.location.origin;
 
@@ -26,13 +27,13 @@ export function getSocket(): Socket {
 
 export function subscribeToRun(
   runId: string,
-  callback: (event: any) => void,
+  callback: (event: TelemetryEvent) => void,
 ): () => void {
   const s = getSocket();
   s.emit('subscribe_run', { runId });
 
   // Filter so only events for this runId reach the callback
-  const handler = (event: any) => {
+  const handler = (event: TelemetryEvent) => {
     if (!event.runId || event.runId === runId) {
       callback(event);
     }

@@ -1,6 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import type {
+  ExperimentConfig,
+  ExperimentRow,
+  ExperimentRunRow,
+  RunMetricRow,
+} from '@/lib/wire';
 import { CheckSquare, Square, GitCompare, Loader2, BarChart2, ZoomIn, ZoomOut } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -11,16 +17,24 @@ import { cn } from '@/lib/cn';
 const PALETTE = ['#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
 
 // ─── Run Browser ────────────────────────────────────────────────────────────
-function ExperimentRunGroup({ experiment, selectedIds, onToggle }: any) {
-  const runs: any[] = experiment.runs ?? [];
-  const completed = runs.filter((r: any) => r.status === 'completed');
+function ExperimentRunGroup({
+  experiment,
+  selectedIds,
+  onToggle,
+}: {
+  experiment: ExperimentRow;
+  selectedIds: string[];
+  onToggle: (id: string) => void;
+}) {
+  const runs = experiment.runs ?? [];
+  const completed = runs.filter((r) => r.status === 'completed');
   if (completed.length === 0) return null;
   return (
     <div>
       <div className="px-4 py-1.5 bg-bg-primary/60 text-xs text-text-muted font-medium sticky top-0">
         {experiment.name}
       </div>
-      {completed.map((run: any) => {
+      {completed.map((run) => {
         const selected = selectedIds.includes(run.id);
         const idx = selectedIds.indexOf(run.id);
         return (
@@ -47,7 +61,7 @@ function RunBrowser({ selectedIds, onToggle }: { selectedIds: string[]; onToggle
     queryKey: ['experiments'],
     queryFn: () => api.getExperiments(1, 50),
   });
-  const experiments: any[] = expData?.items ?? [];
+  const experiments = expData?.items ?? [];
   return (
     <div className="card">
       <div className="card-header">
@@ -66,17 +80,23 @@ function RunBrowser({ selectedIds, onToggle }: { selectedIds: string[]; onToggle
 }
 
 // ─── Parameter diff ──────────────────────────────────────────────────────────
-function getVal(run: any, key: string) {
+function getVal(run: ExperimentRunRow, key: string): string | number {
   if (key === 'seed') return run.seed;
   if (key === 'totalSteps') return run.totalSteps;
-  const cfg = run.experiment?.config ?? {};
-  if (key.startsWith('config.')) return cfg[key.replace('config.', '')] ?? '—';
-  const params = cfg.parameters ?? {};
-  if (key.startsWith('param.')) return params[key.replace('param.', '')] ?? '—';
+  const cfg = run.experiment?.config;
+  if (key.startsWith('config.')) {
+    const field = key.replace('config.', '') as keyof ExperimentConfig;
+    const value = cfg?.[field];
+    return typeof value === 'number' || typeof value === 'string' ? value : '—';
+  }
+  if (key.startsWith('param.')) {
+    const value = cfg?.parameters?.[key.replace('param.', '')];
+    return typeof value === 'boolean' ? String(value) : value ?? '—';
+  }
   return '—';
 }
 
-function ParamDiff({ runs }: { runs: any[] }) {
+function ParamDiff({ runs }: { runs: ExperimentRunRow[] }) {
   const keys = ['seed', 'totalSteps', 'param.global_coupling', 'param.gain', 'param.noise_sigma', 'param.tau'];
   const labelMap: Record<string, string> = {
     'seed': 'Seed', 'totalSteps': 'Total Steps',
@@ -116,20 +136,19 @@ function ParamDiff({ runs }: { runs: any[] }) {
 }
 
 // ─── Stat bar chart ──────────────────────────────────────────────────────────
-function BrainStateSummary({ runs, allMetrics, selectedIds }: { runs: any[]; allMetrics: Record<string, any[]>; selectedIds: string[] }) {
+function BrainStateSummary({ runs, allMetrics, selectedIds }: { runs: ExperimentRunRow[]; allMetrics: Record<string, RunMetricRow[]>; selectedIds: string[] }) {
   // Compute final-state stats for each run
   const stats = selectedIds.map((id, i) => {
     const metrics = allMetrics[id] ?? [];
     if (metrics.length === 0) return null;
     // Use last 10% of data as "steady state"
     const tail = metrics.slice(Math.max(0, metrics.length - Math.ceil(metrics.length * 0.1)));
-    const parse = (m: any) => typeof m.metrics === 'string' ? JSON.parse(m.metrics) : m.metrics;
-    const means = tail.map((m: any) => parse(m)?.mean_activity ?? 0);
-    const maxes = tail.map((m: any) => parse(m)?.max_activity ?? 0);
-    const divs = tail.map((m: any) => parse(m)?.std_across_regions ?? 0);
-    const stds = tail.map((m: any) => parse(m)?.std_activity ?? 0);
+    const means = tail.map((m) => m.metrics?.mean_activity ?? 0);
+    const maxes = tail.map((m) => m.metrics?.max_activity ?? 0);
+    const divs = tail.map((m) => m.metrics?.std_across_regions ?? 0);
+    const stds = tail.map((m) => m.metrics?.std_activity ?? 0);
     const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
-    const label = runs.find((r: any) => r.id === id)?.experiment?.name?.replace(/^[^\w]*/, '').slice(0, 22) ?? id.slice(0, 8);
+    const label = runs.find((r) => r.id === id)?.experiment?.name?.replace(/^[^\w]*/, '').slice(0, 22) ?? id.slice(0, 8);
     return {
       id, label, color: PALETTE[i % PALETTE.length],
       mean: avg(means),
@@ -196,8 +215,8 @@ export function CompareRunsPage() {
     mutationFn: () => api.compareRuns(selectedIds),
   });
 
-  const runs: any[] = compareMutation.data?.runs ?? [];
-  const allMetrics: Record<string, any[]> = compareMutation.data?.metrics ?? {};
+  const runs = compareMutation.data?.runs ?? [];
+  const allMetrics = compareMutation.data?.metrics ?? {};
 
   // Build merged chart data: one entry per step, one key per run
   const chartData = useMemo(() => {
@@ -302,7 +321,7 @@ export function CompareRunsPage() {
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   {selectedIds.map((id, i) => (
                     <Line key={id} type="monotone" dataKey={`${id.slice(0, 8)}_mean`}
-                      name={runs.find((r: any) => r.id === id)?.experiment?.name?.slice(0, 30) ?? id.slice(0, 8)}
+                      name={runs.find((r) => r.id === id)?.experiment?.name?.slice(0, 30) ?? id.slice(0, 8)}
                       stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot={false} connectNulls />
                   ))}
                 </LineChart>
@@ -332,7 +351,7 @@ export function CompareRunsPage() {
                   <ReferenceLine y={0} stroke="#334155" />
                   {selectedIds.map((id, i) => (
                     <Line key={id} type="monotone" dataKey={`${id.slice(0, 8)}_divergence`}
-                      name={runs.find((r: any) => r.id === id)?.experiment?.name?.slice(0, 30) ?? id.slice(0, 8)}
+                      name={runs.find((r) => r.id === id)?.experiment?.name?.slice(0, 30) ?? id.slice(0, 8)}
                       stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot={false} connectNulls />
                   ))}
                 </LineChart>
@@ -356,7 +375,7 @@ export function CompareRunsPage() {
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   {selectedIds.map((id, i) => (
                     <Line key={id} type="monotone" dataKey={`${id.slice(0, 8)}_max`}
-                      name={runs.find((r: any) => r.id === id)?.experiment?.name?.slice(0, 30) ?? id.slice(0, 8)}
+                      name={runs.find((r) => r.id === id)?.experiment?.name?.slice(0, 30) ?? id.slice(0, 8)}
                       stroke={PALETTE[i % PALETTE.length]} strokeWidth={1.5} strokeDasharray="4 2" dot={false} connectNulls />
                   ))}
                 </LineChart>
@@ -380,7 +399,7 @@ export function CompareRunsPage() {
       {/* ── Run cards ── */}
       {runs.length > 0 && (
         <div className={cn('grid gap-4', runs.length >= 3 ? 'grid-cols-3' : 'grid-cols-2')}>
-          {runs.map((run: any, i: number) => (
+          {runs.map((run, i) => (
             <div key={run.id} className="card card-body" style={{ borderLeftColor: PALETTE[i % PALETTE.length], borderLeftWidth: 3 }}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PALETTE[i % PALETTE.length] }} />

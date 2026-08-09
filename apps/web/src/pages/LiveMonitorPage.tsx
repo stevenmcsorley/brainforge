@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState, useCallback, useRef, useMemo, Suspense } from 'react';
 import { api } from '@/lib/api';
+import type { RunCommandPayload } from '@/lib/wire';
 import { subscribeToRun } from '@/lib/websocket';
 import { EnvironmentRegistry, EnvironmentType } from '../components/environments';
 import { cn } from '@/lib/cn';
@@ -159,12 +160,12 @@ async function fetchPersistedMetrics(runId: string): Promise<MetricPoint[]> {
   try {
     const data = await api.getRunMetrics(runId);
     if (!Array.isArray(data)) return [];
-    return data.map((m: any) => ({
+    return data.map((m) => ({
       step: m.step,
-      mean_activity: m.metrics?.mean_activity ?? m.meanActivity ?? 0,
-      std_activity: m.metrics?.std_activity ?? m.stdActivity ?? 0,
-      max_activity: m.metrics?.max_activity ?? m.maxActivity ?? 0,
-      mean_weight: m.metrics?.mean_weight ?? m.meanWeight,
+      mean_activity: m.metrics?.mean_activity ?? 0,
+      std_activity: m.metrics?.std_activity ?? 0,
+      max_activity: m.metrics?.max_activity ?? 0,
+      mean_weight: m.metrics?.mean_weight,
     }));
   } catch { return []; }
 }
@@ -195,7 +196,7 @@ export function LiveMonitorPage() {
   });
 
   const regions: RegionCoord[] = useMemo(
-    () => (mapData?.regions ?? []).filter((r: any) => r.coordX !== null),
+    () => (mapData?.regions ?? []).filter((r) => r.coordX !== null),
     [mapData],
   );
 
@@ -217,7 +218,7 @@ export function LiveMonitorPage() {
   // Live WebSocket subscription
   useEffect(() => {
     if (!runId) return;
-    const unsub = subscribeToRun(runId, (event: any) => {
+    const unsub = subscribeToRun(runId, (event) => {
       switch (event.type) {
         case 'run_progress':
           setProgress(event.progress);
@@ -254,7 +255,7 @@ export function LiveMonitorPage() {
     return unsub;
   }, [runId]);
 
-  const handleCommand = useCallback(async (command: any) => {
+  const handleCommand = useCallback(async (command: RunCommandPayload) => {
     if (!runId) return;
     await api.sendRunCommand(runId, command);
     if (command === 'pause') setStatus('paused');
@@ -348,7 +349,7 @@ export function LiveMonitorPage() {
 
       {/* Main Content Area */}
       {showPong && run?.experiment?.config?.environment ? (() => {
-        const envConfig = run.experiment.config.environment as any;
+        const envConfig = run.experiment.config.environment;
         const EnvComponent = EnvironmentRegistry[envConfig.type as EnvironmentType];
         
         if (!EnvComponent) {

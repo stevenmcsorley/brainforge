@@ -21,6 +21,8 @@ export const ExperimentSchema = z.object({
     duration: z.number().positive(),
     dt: z.number().positive().default(0.001),
     seed: z.number().int().optional(),
+    reportInterval: z.number().int().positive().optional(),
+    checkpointInterval: z.number().int().positive().optional(),
     parameters: z.record(z.union([z.number(), z.boolean(), z.string()])).optional(),
     environment: z.object({
       type: z.enum(['pong', 'braitenberg', 'cartpole']),
@@ -43,6 +45,8 @@ export const CreateExperimentSchema = z.object({
     duration: z.number().positive(),
     dt: z.number().positive().default(0.001),
     seed: z.number().int().optional(),
+    reportInterval: z.number().int().positive().optional(),
+    checkpointInterval: z.number().int().positive().optional(),
     parameters: z.record(z.union([z.number(), z.boolean(), z.string()])).optional(),
     environment: z.object({
       type: z.enum(['pong', 'braitenberg', 'cartpole']),

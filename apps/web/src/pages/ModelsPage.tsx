@@ -25,7 +25,7 @@ export function ModelsPage() {
         <div className="text-sm text-text-muted">Loading models...</div>
       ) : (
         <div className="grid gap-3">
-          {data?.items?.map((model: any) => (
+          {data?.items?.map((model) => (
             <div
               key={model.id}
               className="card card-body cursor-pointer hover:border-border-hover transition-colors"
