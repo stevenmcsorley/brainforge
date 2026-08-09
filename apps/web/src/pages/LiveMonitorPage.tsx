@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { Pause, Play, Square, Activity, Brain, BarChart2, Eye, EyeOff, Gamepad } from 'lucide-react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -121,8 +121,6 @@ function LiveBrainScene({
 
   return (
     <>
-
-
       <ambientLight intensity={0.2} />
       <pointLight position={[0, 50, 50]} intensity={1.2} color="#8080ff" />
       <pointLight position={[0, -30, -30]} intensity={0.6} color="#ff8040" />
@@ -139,9 +137,11 @@ function LiveBrainScene({
       ))}
 
       {hovered && (
-        <mesh position={[0, -14, 0]}>
-          {/* just use Html from drei for tooltip would need import — skip for now */}
-        </mesh>
+        <Html position={[0, -14, 0]} center distanceFactor={60}>
+          <div className="px-2 py-1 rounded bg-bg-primary/90 border border-border text-xs text-text-primary whitespace-nowrap pointer-events-none">
+            {hovered}
+          </div>
+        </Html>
       )}
 
       <OrbitControls
@@ -190,11 +190,7 @@ export function LiveMonitorPage() {
   // Fetch region coordinates (for 3D view)
   const { data: mapData } = useQuery({
     queryKey: ['activity-map', runId],
-    queryFn: async () => {
-      const r = await fetch(`/api/runs/${runId}/activity-map`);
-      if (!r.ok) return null;
-      return r.json();
-    },
+    queryFn: () => api.getRunActivityMap(runId!).catch(() => null),
     enabled: !!runId && show3D,
   });
 

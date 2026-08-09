@@ -18,6 +18,11 @@ export const RunCommandSchema = z.union([
     node: z.number().int().nonnegative(),
     value: z.number(),
   }),
+  // Emitted by interactive environments (e.g. Brain-Pong) to modulate plasticity.
+  z.object({
+    command: z.literal('reward'),
+    value: z.number(),
+  }),
 ]);
 
 export const ExperimentRunSchema = z.object({

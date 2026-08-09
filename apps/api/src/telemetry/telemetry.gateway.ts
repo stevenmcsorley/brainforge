@@ -23,14 +23,28 @@ export class TelemetryGateway
   @WebSocketServer()
   server!: Server;
 
+  /** Runs each socket is subscribed to, so we can release them on disconnect. */
+  private clientRuns = new Map<string, Set<string>>();
+
   constructor(private telemetryService: TelemetryService) {}
 
   handleConnection(client: Socket) {
     console.log(`[Telemetry] Client connected: ${client.id}`);
+    this.clientRuns.set(client.id, new Set());
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     console.log(`[Telemetry] Client disconnected: ${client.id}`);
+
+    // Release every run this socket was watching — without this, a closed tab
+    // leaks its Redis subscription for the lifetime of the process.
+    const runs = this.clientRuns.get(client.id);
+    this.clientRuns.delete(client.id);
+    if (!runs) return;
+
+    for (const runId of runs) {
+      await this.telemetryService.unsubscribeFromRun(runId);
+    }
   }
 
   @SubscribeMessage('subscribe_run')
@@ -39,7 +53,16 @@ export class TelemetryGateway
     @ConnectedSocket() client: Socket,
   ) {
     const { runId } = data;
+    if (!runId) return { error: 'runId is required' };
+
+    // Ignore a repeat subscribe from the same socket, or its refCount and the
+    // room membership drift apart.
+    const runs = this.clientRuns.get(client.id) ?? new Set<string>();
+    this.clientRuns.set(client.id, runs);
+    if (runs.has(runId)) return { subscribed: runId };
+
     client.join(`run:${runId}`);
+    runs.add(runId);
 
     await this.telemetryService.subscribeToRun(runId, (eventJson) => {
       try {
@@ -54,12 +77,19 @@ export class TelemetryGateway
   }
 
   @SubscribeMessage('unsubscribe_run')
-  handleUnsubscribeRun(
+  async handleUnsubscribeRun(
     @MessageBody() data: { runId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.leave(`run:${data.runId}`);
-    return { unsubscribed: data.runId };
+    const { runId } = data;
+    const runs = this.clientRuns.get(client.id);
+    if (!runs?.has(runId)) return { unsubscribed: runId };
+
+    client.leave(`run:${runId}`);
+    runs.delete(runId);
+    await this.telemetryService.unsubscribeFromRun(runId);
+
+    return { unsubscribed: runId };
   }
 
   // Called by internal services to broadcast events

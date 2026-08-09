@@ -17,3 +17,4 @@ storage/
 *.pkl
 .turbo/
 coverage/
+*.tsbuildinfo

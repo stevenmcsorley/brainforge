@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { json, urlencoded } from 'express';
 
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ZodExceptionFilter } from './common/zod-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -17,6 +18,7 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.useGlobalFilters(new ZodExceptionFilter());
   app.setGlobalPrefix('api');
 
   const port = parseInt(process.env.API_PORT || '3001', 10);

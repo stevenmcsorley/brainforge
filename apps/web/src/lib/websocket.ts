@@ -44,11 +44,3 @@ export function subscribeToRun(
     s.off('telemetry_event', handler);
   };
 }
-
-export function sendRunCommand(
-  runId: string,
-  command: 'pause' | 'resume' | 'stop',
-): void {
-  const s = getSocket();
-  s.emit('run_command', { runId, command });
-}

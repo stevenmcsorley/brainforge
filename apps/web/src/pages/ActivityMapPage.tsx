@@ -4,6 +4,7 @@ import { Suspense, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import * as THREE from 'three';
+import { api } from '@/lib/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -283,9 +284,7 @@ export default function ActivityMapPage() {
     const { data: runInfo } = useQuery<{ status: string; progress: number }>({
         queryKey: ['run-status', runId],
         queryFn: async () => {
-            const r = await fetch(`/api/runs/${runId}`);
-            if (!r.ok) throw new Error(await r.text());
-            const d = await r.json();
+            const d = await api.getRun(runId!);
             return { status: d.status, progress: d.progress };
         },
         enabled: !!runId,
@@ -296,11 +295,7 @@ export default function ActivityMapPage() {
 
     const { data, isLoading, error } = useQuery<ActivityMapData>({
         queryKey: ['activity-map', runId],
-        queryFn: async () => {
-            const r = await fetch(`/api/runs/${runId}/activity-map`);
-            if (!r.ok) throw new Error(await r.text());
-            return r.json();
-        },
+        queryFn: () => api.getRunActivityMap(runId!),
         enabled: !!runId,
         // Only keep polling if run is still active AND no data yet
         refetchInterval: (q) => (!q.state.data?.hasData && !isTerminalRun ? 4000 : false),

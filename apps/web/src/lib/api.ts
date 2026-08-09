@@ -64,6 +64,8 @@ export const api = {
       body: JSON.stringify({ command }),
     }),
   getRunMetrics: (runId: string) => request<any[]>(`/runs/${runId}/metrics`),
+  getRunActivityMap: (runId: string) =>
+    request<any>(`/runs/${runId}/activity-map`),
   compareRuns: (runIds: string[]) =>
     request<any>('/runs/compare', {
       method: 'POST',

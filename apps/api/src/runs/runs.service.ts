@@ -8,6 +8,18 @@ import { RedisService } from '../common/redis.service';
 import { JobQueueService } from './job-queue.service';
 import { TELEMETRY_CHANNELS } from '@brainforge/config';
 
+/** Run states from which no further transition is expected. */
+export const TERMINAL_RUN_STATES = ['completed', 'failed', 'cancelled'];
+
+/** Redis key the worker checks before starting a job it dequeued. */
+export const CANCEL_FLAG_KEY = (runId: string) => `brainforge:run:${runId}:cancelled`;
+
+/** Long enough to outlive any queue wait; the flag is advisory only. */
+const CANCEL_FLAG_TTL_SEC = 60 * 60 * 24;
+
+/** Matches the selection cap enforced by the Compare Runs UI. */
+const MAX_COMPARE_RUNS = 5;
+
 @Injectable()
 export class RunsService {
   constructor(
@@ -95,6 +107,11 @@ export class RunsService {
     if (command === 'resume' && run.status !== 'paused') {
       throw new BadRequestException('Can only resume a paused simulation');
     }
+    if (command === 'stop' && TERMINAL_RUN_STATES.includes(run.status)) {
+      throw new BadRequestException(
+        `Run is already ${run.status} and cannot be stopped`,
+      );
+    }
 
     const channel = TELEMETRY_CHANNELS.runEvents(runId);
     await this.redis.publish(
@@ -110,8 +127,13 @@ export class RunsService {
     if (command === 'stop') {
       await this.prisma.experimentRun.update({
         where: { id: runId },
-        data: { status: 'cancelled' },
+        data: { status: 'cancelled', completedAt: new Date() },
       });
+      // A queued run has no worker listening on the pub/sub channel yet, so the
+      // command above reaches nobody. Set a flag the worker checks before it
+      // starts executing, and drop the job from the queue if it hasn't started.
+      await this.redis.set(CANCEL_FLAG_KEY(runId), '1', CANCEL_FLAG_TTL_SEC);
+      await this.jobQueue.removeIfPending(runId);
     } else if (command === 'pause') {
       await this.prisma.experimentRun.update({
         where: { id: runId },
@@ -132,6 +154,17 @@ export class RunsService {
     status: string,
     extra?: { progress?: number; currentStep?: number; error?: string },
   ) {
+    // A cancelled run must stay cancelled. Without this, a worker that dequeued
+    // the job just before the stop lands would PATCH it back to 'running'.
+    const current = await this.prisma.experimentRun.findUnique({
+      where: { id: runId },
+      select: { status: true },
+    });
+    if (!current) throw new NotFoundException(`Run ${runId} not found`);
+    if (current.status === 'cancelled' && !TERMINAL_RUN_STATES.includes(status)) {
+      return this.prisma.experimentRun.findUniqueOrThrow({ where: { id: runId } });
+    }
+
     const run = await this.prisma.experimentRun.update({
       where: { id: runId },
       data: {
@@ -149,13 +182,12 @@ export class RunsService {
     });
 
     // When a run reaches a terminal state, roll up to the experiment status
-    const terminalStates = ['completed', 'failed', 'cancelled'];
-    if (terminalStates.includes(status)) {
+    if (TERMINAL_RUN_STATES.includes(status)) {
       const allRuns = await this.prisma.experimentRun.findMany({
         where: { experimentId: run.experimentId },
         select: { status: true },
       });
-      const allDone = allRuns.every((r: { status: string }) => terminalStates.includes(r.status));
+      const allDone = allRuns.every((r: { status: string }) => TERMINAL_RUN_STATES.includes(r.status));
       if (allDone) {
         const anyFailed = allRuns.some((r: { status: string }) => r.status === 'failed');
         await this.prisma.experiment.update({
@@ -213,15 +245,33 @@ export class RunsService {
   }
 
   async compareRuns(runIds: string[]) {
+    if (!Array.isArray(runIds) || runIds.length === 0) {
+      throw new BadRequestException('runIds must be a non-empty array');
+    }
+    if (runIds.length > MAX_COMPARE_RUNS) {
+      throw new BadRequestException(
+        `Cannot compare more than ${MAX_COMPARE_RUNS} runs at once`,
+      );
+    }
+
+    const uniqueIds = [...new Set(runIds)];
     const runs = await this.prisma.experimentRun.findMany({
-      where: { id: { in: runIds } },
+      where: { id: { in: uniqueIds } },
       include: {
         experiment: { select: { name: true, config: true } },
       },
     });
 
+    // Reject unknown IDs rather than returning empty metric series for them,
+    // which the client would render as a phantom run.
+    const found = new Set(runs.map((r: { id: string }) => r.id));
+    const missing = uniqueIds.filter((id) => !found.has(id));
+    if (missing.length > 0) {
+      throw new NotFoundException(`Run(s) not found: ${missing.join(', ')}`);
+    }
+
     const metrics = await Promise.all(
-      runIds.map((id) =>
+      uniqueIds.map((id) =>
         this.prisma.runMetric.findMany({
           where: { runId: id },
           orderBy: { step: 'asc' },
@@ -231,7 +281,7 @@ export class RunsService {
 
     return {
       runs,
-      metrics: Object.fromEntries(runIds.map((id, i) => [id, metrics[i]])),
+      metrics: Object.fromEntries(uniqueIds.map((id, i) => [id, metrics[i]])),
     };
   }
 

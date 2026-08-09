@@ -146,6 +146,14 @@ class SimWorker:
         config_data = payload.get("config", {})
         seed = payload.get("seed", 42)
 
+        # A run can be cancelled while queued, before any worker is listening on
+        # its command channel. The API sets this flag; honour it before starting.
+        if self._is_cancelled(run_id):
+            logger.info("Run %s was cancelled while queued — skipping.", run_id)
+            self.redis.lrem(BULLMQ_ACTIVE_KEY, 1, raw_job)
+            self.redis.delete(f"brainforge:run:{run_id}:cancelled")
+            return
+
         try:
             self._patch_status(run_id, "initializing")
 
@@ -219,6 +227,18 @@ class SimWorker:
             self.current_runner = None
             # Remove from active list
             self.redis.lrem(BULLMQ_ACTIVE_KEY, 1, raw_job)
+            try:
+                self.redis.delete(f"brainforge:run:{run_id}:cancelled")
+            except Exception:
+                pass  # TTL will reap it
+
+    def _is_cancelled(self, run_id: str) -> bool:
+        """Check the API-set cancellation flag for a run."""
+        try:
+            return self.redis.get(f"brainforge:run:{run_id}:cancelled") is not None
+        except Exception as e:
+            logger.error("Failed to read cancel flag for %s: %s", run_id, e)
+            return False
 
     def _fetch_model(self, model_id: str) -> BrainModel:
         """Fetch model, regions, and connectivity from the API."""

@@ -41,6 +41,27 @@ export class JobQueueService implements OnModuleDestroy {
     return job.id!;
   }
 
+  /**
+   * Remove a job that has not started yet. Returns false if the job is already
+   * active (the worker owns it at that point and must stop via pub/sub) or gone.
+   */
+  async removeIfPending(jobId: string): Promise<boolean> {
+    try {
+      const job = await this.queue.getJob(jobId);
+      if (!job) return false;
+
+      const state = await job.getState();
+      if (state !== 'waiting' && state !== 'delayed') return false;
+
+      await job.remove();
+      return true;
+    } catch (err) {
+      // Best-effort: the cancel flag is the authoritative stop signal.
+      console.error(`[JobQueue] Failed to remove job ${jobId}:`, err);
+      return false;
+    }
+  }
+
   async getJobStatus(jobId: string) {
     const job = await this.queue.getJob(jobId);
     if (!job) return null;
