@@ -42,12 +42,23 @@ This document honestly describes the current limitations and design boundaries o
   three_factor scored +0.000. It is still not a result — t = 1.41 at n = 5,
   interception error improves *less* than in the control, and final performance
   (~0.13) is below the position-tracking baseline of 0.205
-- The limit on `node_perturb` is structural. REINFORCE requires the perturbed
-  unit to move the output; with a 3-region readout in a 68-region network and
-  per-hop gain ~0.005, a perturbation explains only 0.4–2.7% of readout variance
-  and raising `pert_sigma` 8× does not change that. About 96% of perturbations
-  are invisible to the reward. A readout coupled to far more of the network is
-  the prerequisite, not a larger perturbation
+- The limit on `node_perturb` is REINFORCE's gradient variance, not readout
+  coupling. Coupling the readout to all 68 regions was tested directly and did
+  **not** help: +0.028 against a frozen-weight control, t = 0.76, with one seed
+  of five going backwards. The estimator draws one sample of a 69-dimensional
+  gradient per frame while the reward depends on all 69 perturbations jointly,
+  giving roughly 540 effective samples per dimension over 600 s of training —
+  far too few, and the ball's randomness adds further reward variance
+- Weak readout coupling is nonetheless real and compounds it: with a 3-region
+  readout in a 68-region network and per-hop gain ~0.005, a perturbation
+  explains only 0.4–2.7% of readout variance and raising `pert_sigma` 8× does
+  not change that
+- Before designing a task, check the ceiling. A *perfectly fitted* linear
+  population readout achieves 11.3 units of mean landing-point error against a
+  4-unit paddle — in range only 26% of the time. The original predictive task
+  was therefore unsolvable by any linear readout on this network, independent of
+  learning. At `paddle_half=12` a fitted readout reaches 0.571 against 0.212 for
+  a stationary paddle, which is a difficulty where learning could show
 - Rally rate alone is not a valid skill metric on every task variant. Before
   trusting a learning curve, score the task with
   `engine.experiments.pong_env.policy_baselines()` and check that a do-nothing
