@@ -37,6 +37,20 @@ three-variable capacity test is likewise flat.
 Measured on DK68 Pong, five seeds, 600 s of training, evaluated with plasticity
 frozen on an unseen ball sequence: rally rate 0.285 -> 0.787 (+0.502, positive
 in 5/5 seeds). A static paddle scores 0.278 and a perfect one 1.000.
+
+**Reward does not work for control tasks that require a computation.** On the
+predictive interception variant, where the actuator must extrapolate from
+velocity rather than track a current position, every reward-driven method
+failed against its control: three-factor +0.000, node perturbation +0.064
+(t = 1.41), population readout + REINFORCE +0.028 (t = 0.76). Fitting the
+readout supervised instead reaches 0.68-0.75 against a stationary baseline of
+0.212 — roughly four times better than anything reward achieved. Layering
+reward fine-tuning on top of that fitted readout adds nothing measurable
+(0.680 -> 0.696, t = 0.26, interception error unchanged).
+
+Use `fit_readout` from `engine.analysis.readout` for control tasks. Reward
+modulation is retained for studying plasticity dynamics — the tracking result
+above is real — but it is not the route to a working controller.
 """
 
 from typing import Any, Dict, List, Optional
@@ -103,6 +117,54 @@ def training_experiment(
                 **CLOSED_LOOP_NETWORK_PARAMS,
                 **CLOSED_LOOP_PLASTICITY_PARAMS,
                 "plasticity_enabled": plasticity,
+            },
+            "environment": {
+                "type": environment,
+                "sensoryNodes": sensory_nodes or DK68_SENSORY_BANK,
+                "motorNodes": motor_nodes or DK68_MOTOR_POOL,
+            },
+            "stimuli": [],
+        },
+    }
+
+
+def control_experiment(
+    model_id: str,
+    environment: str = "pong",
+    duration: float = 600.0,
+    dt: float = 0.001,
+    seed: int = 42,
+    sensory_nodes: Optional[List[int]] = None,
+    motor_nodes: Optional[List[int]] = None,
+    name: str = "Closed-loop control (fitted readout)",
+    description: str = (
+        "Sensorimotor control with a supervised readout and no reward "
+        "modulation. See engine.analysis.readout.fit_readout."),
+    tags: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Config for a control task driven by a fitted readout, with reward off.
+
+    This is the configuration to use for control. Reward-modulated plasticity is
+    disabled because it was measured not to help: on predictive interception it
+    reached at best +0.064 (t = 1.41) against its control, while a fitted readout
+    reaches 0.68-0.75, and adding reward on top of that readout changed nothing
+    (t = 0.26). Fit the readout with `fit_readout` on a teacher-forced rollout
+    and drive the actuator from `LinearReadout.predict`.
+    """
+    return {
+        "name": name,
+        "description": description,
+        "modelId": model_id,
+        "tags": tags or ["closed-loop", "control", "fitted-readout", environment],
+        "config": {
+            "backend": "rate_based",
+            "duration": duration,
+            "dt": dt,
+            "seed": seed,
+            "reportInterval": 100,
+            "parameters": {
+                **CLOSED_LOOP_NETWORK_PARAMS,
+                "plasticity_enabled": False,
             },
             "environment": {
                 "type": environment,

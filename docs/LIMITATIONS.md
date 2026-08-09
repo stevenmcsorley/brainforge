@@ -53,6 +53,12 @@ This document honestly describes the current limitations and design boundaries o
   readout in a 68-region network and per-hop gain ~0.005, a perturbation
   explains only 0.4–2.7% of readout variance and raising `pert_sigma` 8× does
   not change that
+- Reward modulation is **not** the route to a working controller and is
+  disabled in `control_experiment`. A supervised readout reaches 0.68–0.75
+  where reward methods reached 0.10–0.17, and reward fine-tuning on top of a
+  fitted readout changes nothing (0.680 → 0.696, t = 0.26). The `three_factor`
+  and `node_perturb` backends are retained for studying plasticity dynamics —
+  the tracking result is real — not as control mechanisms
 - **The substrate is not the limit; the learning rule is.** Given identical
   network activity and the identical 69 readout weights, closed-form supervised
   regression reaches r = 0.846 and lands within the paddle 67.4% of the time,

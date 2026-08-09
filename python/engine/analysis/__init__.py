@@ -7,6 +7,7 @@ Provides functions for:
 - phase-based synchrony (Kuramoto order parameter)
 - instability / divergence detection
 - run comparison utilities
+- supervised linear readouts over population activity
 """
 
 from .metrics import (
@@ -27,6 +28,9 @@ from .compare import (
 )
 
 __all__ = [
+    "LinearReadout",
+    "fit_readout",
+    "evaluate_readout",
     "compute_mean_activity",
     "compute_variance",
     "compute_autocorrelation",
@@ -40,3 +44,4 @@ __all__ = [
     "compute_run_distance",
     "summarise_run",
 ]
+from .readout import LinearReadout, fit_readout, evaluate_readout

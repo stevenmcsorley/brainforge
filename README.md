@@ -197,6 +197,20 @@ other parcellations.
 > tracking gain, but cannot build a structured mapping like
 > `landing = f(position, velocity)`.
 >
+> **What works for control: fit the readout, don't reward it.** Supervised
+> least squares on the readout weights, fitted from a teacher-forced rollout,
+> reaches **0.68–0.75** held-out rally on predictive interception against a
+> stationary baseline of 0.212 — roughly four times better than any
+> reward-driven method managed on the same task. `engine.analysis.readout`
+> provides `fit_readout`, and `engine.experiments.control_experiment` is the
+> matching config with reward disabled.
+>
+> Layering reward fine-tuning on top of that fitted readout was measured and
+> adds nothing: 0.680 → 0.696 across five held-out seeds, **t = 0.26**, with
+> interception error unchanged to three decimals while weights moved by
+> |dw| ≈ 2.5–3.2. Two seeds improved, two degraded, one was flat — it perturbs
+> the solution without improving it.
+>
 > **The network is not the limit — the learning rule is.** Given the same
 > activity and the same 69 readout weights, closed-form supervised regression
 > reaches r = 0.846 and lands within the paddle 67.4% of the time, while

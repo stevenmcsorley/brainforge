@@ -22,6 +22,7 @@ __all__ = [
     "parameter_sweep_experiment",
 ]
 from .closed_loop import (
+    control_experiment,
     training_experiment,
     training_control_pair,
     CLOSED_LOOP_NETWORK_PARAMS,
