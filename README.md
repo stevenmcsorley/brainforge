@@ -197,6 +197,16 @@ other parcellations.
 > tracking gain, but cannot build a structured mapping like
 > `landing = f(position, velocity)`.
 >
+> **The network is not the limit — the learning rule is.** Given the same
+> activity and the same 69 readout weights, closed-form supervised regression
+> reaches r = 0.846 and lands within the paddle 67.4% of the time, while
+> REINFORCE on those same weights manages +0.028 (t = 0.76, noise). Ball
+> position, velocity and landing point all decode from network activity
+> (r = 0.968, 0.965, 0.934) and a fitted readout plays a perfect game. What
+> fails is acquiring that readout from a scalar reward — the known
+> credit-assignment gap between biologically-plausible plasticity and gradient
+> methods, not something specific to this platform.
+>
 > The `node_perturb` backend supplies the missing per-synapse credit assignment
 > and does measurably better — **+0.064** held-out rally against a **+0.033**
 > control, where three-factor scored +0.000 — but this is still not a working

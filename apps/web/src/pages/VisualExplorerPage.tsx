@@ -6,6 +6,11 @@ import * as THREE from 'three';
 import { api } from '@/lib/api';
 import type { ConnectionRow } from '@/lib/wire';
 
+/** Edges requested from the API; the renderer caps well below this. */
+const EDGE_FETCH_LIMIT = 5000;
+/** Edges actually drawn, to keep the scene interactive. */
+const EDGE_RENDER_CAP = 600;
+
 // ─── Individual region node — small faceted icosahedron with emissive glow ──
 function NeuronNode({
   position,
@@ -99,7 +104,7 @@ function ConnectivityEdges({
     const filtered = connections
       .filter((c) => c.weight >= threshold)
       .sort((a, b) => b.weight - a.weight)
-      .slice(0, 600); // cap at 600 edges to keep it smooth
+      .slice(0, EDGE_RENDER_CAP);
 
     return filtered.map((c) => {
       const src = regionNodes.get(c.sourceRegionId);
@@ -160,7 +165,10 @@ export function VisualExplorerPage() {
 
   const { data: connections } = useQuery({
     queryKey: ['model-connectivity', modelId],
-    queryFn: () => api.getModelConnectivity(modelId!),
+    // Only the strongest edges are ever rendered (see EDGE_RENDER_CAP), so ask
+    // the server for those rather than downloading the whole connectome —
+    // unfiltered, the 1500-region model is ~46MB.
+    queryFn: () => api.getModelConnectivity(modelId!, { limit: EDGE_FETCH_LIMIT }),
     enabled: !!modelId && showEdges,
   });
 

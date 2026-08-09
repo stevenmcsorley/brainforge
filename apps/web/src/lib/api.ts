@@ -66,8 +66,22 @@ export const api = {
   createModel: (data: CreateBrainModel) =>
     request<BrainModelRow>('/models', { method: 'POST', body: JSON.stringify(data) }),
   getModelRegions: (id: string) => request<RegionRow[]>(`/models/${id}/regions`),
-  getModelConnectivity: (id: string) =>
-    request<ConnectionRow[]>(`/models/${id}/connectivity`),
+  /**
+   * Model connectivity, strongest first. Pass `minWeight`/`limit` on large
+   * models — the 1500-region whole-brain connectome is ~46MB unfiltered.
+   */
+  getModelConnectivity: (
+    id: string,
+    opts?: { minWeight?: number; limit?: number },
+  ) => {
+    const q = new URLSearchParams();
+    if (opts?.minWeight !== undefined) q.set('minWeight', String(opts.minWeight));
+    if (opts?.limit !== undefined) q.set('limit', String(opts.limit));
+    const qs = q.toString();
+    return request<ConnectionRow[]>(
+      `/models/${id}/connectivity${qs ? `?${qs}` : ''}`,
+    );
+  },
 
   // Datasets
   getDatasets: (page = 1, limit = 20) =>

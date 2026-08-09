@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../common/prisma.service';
 import type { CreateBrainModel, UpdateBrainModel } from '@brainforge/contracts';
+
+/** Hard ceiling on a single connectivity response, regardless of `limit`. */
+const MAX_CONNECTIVITY_ROWS = 100_000;
 
 /** Rows per createMany call during model import. */
 const IMPORT_CHUNK_SIZE = 10_000;
@@ -174,11 +177,34 @@ export class ModelsService {
     });
   }
 
-  async getConnectivity(modelId: string) {
+  /**
+   * Connections for a model, strongest first.
+   *
+   * `minWeight` and `limit` matter at scale: the 1500-region whole-brain model
+   * has 252k edges, which serialises to ~46MB and takes seconds — and the 3D
+   * explorer renders only the strongest few hundred of them. Filtering in the
+   * query keeps that payload proportional to what the caller actually uses.
+   * Both are optional, so existing callers are unaffected.
+   */
+  async getConnectivity(
+    modelId: string,
+    opts?: { minWeight?: number; limit?: number },
+  ) {
     const model = await this.findOne(modelId);
     if (!model.connectivitySetId) return [];
+
+    const limit = opts?.limit;
+    if (limit !== undefined && (!Number.isFinite(limit) || limit <= 0)) {
+      throw new BadRequestException('limit must be a positive number');
+    }
+
     return this.prisma.connection.findMany({
-      where: { connectivitySetId: model.connectivitySetId },
+      where: {
+        connectivitySetId: model.connectivitySetId,
+        ...(opts?.minWeight !== undefined && { weight: { gte: opts.minWeight } }),
+      },
+      ...(limit !== undefined && { take: Math.min(limit, MAX_CONNECTIVITY_ROWS) }),
+      orderBy: { weight: 'desc' },
       select: {
         sourceRegionId: true,
         targetRegionId: true,

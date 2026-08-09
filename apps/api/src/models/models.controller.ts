@@ -59,7 +59,14 @@ export class ModelsController {
   }
 
   @Get(':id/connectivity')
-  async getConnectivity(@Param('id') id: string) {
-    return this.modelsService.getConnectivity(id);
+  async getConnectivity(
+    @Param('id') id: string,
+    @Query('minWeight') minWeight?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.modelsService.getConnectivity(id, {
+      minWeight: minWeight !== undefined ? parseFloat(minWeight) : undefined,
+      limit: limit !== undefined ? parseInt(limit, 10) : undefined,
+    });
   }
 }

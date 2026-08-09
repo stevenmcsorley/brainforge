@@ -53,6 +53,16 @@ This document honestly describes the current limitations and design boundaries o
   readout in a 68-region network and per-hop gain ~0.005, a perturbation
   explains only 0.4–2.7% of readout variance and raising `pert_sigma` 8× does
   not change that
+- **The substrate is not the limit; the learning rule is.** Given identical
+  network activity and the identical 69 readout weights, closed-form supervised
+  regression reaches r = 0.846 and lands within the paddle 67.4% of the time,
+  while REINFORCE on those same weights reaches +0.028 (t = 0.76, noise). The
+  network represents the task — ball position, velocity and landing point decode
+  at r = 0.968, 0.965 and 0.934 — and a fitted readout plays a perfect game.
+  What fails is learning that readout from a scalar reward
+- This is the known credit-assignment gap between biologically-plausible
+  plasticity and gradient methods, not a defect specific to this platform.
+  Reward-modulated Hebbian rules are weak at acquiring input→output functions
 - Before designing a task, check the ceiling. A *perfectly fitted* linear
   population readout achieves 11.3 units of mean landing-point error against a
   4-unit paddle — in range only 26% of the time. The original predictive task
