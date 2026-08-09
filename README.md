@@ -167,6 +167,17 @@ other parcellations.
 >   until they clip. `three_factor` adds eligibility traces and a signed reward
 >   prediction error.
 >
+> **What changed in the weights is not task-specific.** After training,
+> mean |dW| is 0.124 with many edges at the 5.0 clip ceiling and 21% of edges
+> moved by more than 1%. Sensory→motor edges strengthened at 0.94x the network
+> average — slightly *less* than typical — and the largest changes are between
+> temporal and occipital regions unrelated to the motor readout. So the
+> behavioural gain is real and survives freezing, but the mechanism looks like a
+> broad increase in network excitability that makes the motor readout more
+> responsive, not a learned sensorimotor mapping. "The network was tuned into a
+> regime where the readout works" is the defensible claim; "the brain learned to
+> track the ball" is not.
+>
 > **Brain size is not a factor.** Ball position decodes at r ≈ 0.93–0.96 on the
 > mouse connectome (N=33), DK68 (68), AAL-90 (90), Schaefer-100 (100) and
 > Schaefer-400 (400) alike; a three-variable capacity test is likewise flat.

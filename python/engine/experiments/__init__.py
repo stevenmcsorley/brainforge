@@ -27,3 +27,8 @@ from .closed_loop import (
     CLOSED_LOOP_NETWORK_PARAMS,
     CLOSED_LOOP_PLASTICITY_PARAMS,
 )
+from .pong_env import (
+    PredictivePongEnv,
+    SpinPongEnv,
+    policy_baselines,
+)

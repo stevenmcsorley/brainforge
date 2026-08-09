@@ -17,8 +17,12 @@ This document honestly describes the current limitations and design boundaries o
 - The default `rate_based` Oja rule performs no credit assignment and has not
   been shown to learn any task; with it, Brain-Pong rally rate declines over a
   session as weights diverge into their clip ceiling
-- The `three_factor` backend does train on Pong tracking (see README), but this
+- The `three_factor` backend does improve Pong tracking (see README), but this
   is one task on one model. Nothing here demonstrates general learning ability
+- The improvement is not a task-specific mapping. Sensory→motor edges change at
+  0.94x the network-average rate and many weights saturate at the clip ceiling,
+  so the gain is better described as a broad shift in network excitability that
+  suits the readout than as a learned sensorimotor pathway
 - Rally rate alone is not a valid skill metric on every task variant. In a
   predictive-interception variant, rally rose in both the plasticity-on and
   plasticity-off arms while interception error got *worse* than a stationary
