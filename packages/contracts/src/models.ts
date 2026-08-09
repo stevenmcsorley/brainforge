@@ -47,6 +47,7 @@ export const SimulationBackendType = z.enum([
   'spiking',
   'whole_brain',
   'three_factor',
+  'node_perturb',
 ]);
 
 export const BrainModelSchema = z.object({

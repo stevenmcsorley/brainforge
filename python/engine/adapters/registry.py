@@ -3,12 +3,14 @@
 from engine.core.backend import SimulationBackend
 from .rate_based import RateBasedBackend
 from .three_factor import ThreeFactorBackend
+from .node_perturb import NodePerturbBackend
 from .spiking import SpikingBackend
 from .whole_brain import WholeBrainBackend
 
 _BACKENDS: dict[str, type[SimulationBackend]] = {
     "rate_based": RateBasedBackend,
     "three_factor": ThreeFactorBackend,
+    "node_perturb": NodePerturbBackend,
     "spiking": SpikingBackend,
     "whole_brain": WholeBrainBackend,
 }

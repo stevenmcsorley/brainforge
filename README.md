@@ -196,6 +196,16 @@ other parcellations.
 > synapse can move the network's operating point, which is what produced the
 > tracking gain, but cannot build a structured mapping like
 > `landing = f(position, velocity)`.
+>
+> The `node_perturb` backend supplies the missing per-synapse credit assignment
+> and does measurably better — **+0.064** held-out rally against a **+0.033**
+> control, where three-factor scored +0.000 — but this is still not a working
+> result: t = 1.41 at n = 5, interception error improves less than in the
+> control, and ~0.13 final performance sits below the 0.205 position-tracking
+> baseline. The blocker is that the readout averages 3 regions out of 68 with
+> per-hop gain ~0.005, so a perturbation explains only 0.4–2.7% of readout
+> variance and ~96% of exploration is invisible to the reward. Coupling the
+> readout to much more of the network is the prerequisite for further progress.
 
 ### Compare Runs
 - Tick any completed runs (up to 5) from the run browser

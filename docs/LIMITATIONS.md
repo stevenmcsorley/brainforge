@@ -36,6 +36,18 @@ This document honestly describes the current limitations and design boundaries o
   global scalar gating every eligible synapse can shift network excitability —
   which is what produced the tracking gain — but cannot sculpt a structured
   input→output mapping such as `landing = f(position, velocity)`
+- `node_perturb` adds the missing spatial credit assignment (34/68 rows up,
+  34 down on one reward, against 58/10 for `three_factor`) and does better on
+  the predictive task: +0.064 held-out rally against a +0.033 control, where
+  three_factor scored +0.000. It is still not a result — t = 1.41 at n = 5,
+  interception error improves *less* than in the control, and final performance
+  (~0.13) is below the position-tracking baseline of 0.205
+- The limit on `node_perturb` is structural. REINFORCE requires the perturbed
+  unit to move the output; with a 3-region readout in a 68-region network and
+  per-hop gain ~0.005, a perturbation explains only 0.4–2.7% of readout variance
+  and raising `pert_sigma` 8× does not change that. About 96% of perturbations
+  are invisible to the reward. A readout coupled to far more of the network is
+  the prerequisite, not a larger perturbation
 - Rally rate alone is not a valid skill metric on every task variant. Before
   trusting a learning curve, score the task with
   `engine.experiments.pong_env.policy_baselines()` and check that a do-nothing
