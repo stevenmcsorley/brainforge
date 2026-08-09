@@ -97,6 +97,12 @@ export class ExperimentsService {
 
   async delete(id: string) {
     await this.findOne(id);
-    return this.prisma.experiment.delete({ where: { id } });
+    // ExperimentRun has no onDelete: Cascade on its experiment relation, so the
+    // runs (and their cascading metrics, events and artifacts) must go first or
+    // the delete fails on a foreign key violation.
+    return this.prisma.$transaction(async (tx: any) => {
+      await tx.experimentRun.deleteMany({ where: { experimentId: id } });
+      return tx.experiment.delete({ where: { id } });
+    });
   }
 }
