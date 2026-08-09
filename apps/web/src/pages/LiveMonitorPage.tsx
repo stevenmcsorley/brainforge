@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import type { RunCommandPayload } from '@/lib/wire';
 import { subscribeToRun } from '@/lib/websocket';
 import { EnvironmentRegistry, EnvironmentType } from '../components/environments';
+import { DK68_DEFAULT_NODES } from '../components/environments/types';
 import { cn } from '@/lib/cn';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -367,8 +368,8 @@ export function LiveMonitorPage() {
               regionActivity={regionActivity}
               onEmitCommand={handleCommand}
               modelName={run?.experiment?.model?.name}
-              sensoryNodes={envConfig.sensoryNodes || [1]}
-              motorNodes={envConfig.motorNodes || [30]}
+              sensoryNodes={envConfig.sensoryNodes || [DK68_DEFAULT_NODES.sensory]}
+              motorNodes={envConfig.motorNodes || [DK68_DEFAULT_NODES.motor]}
               onReward={(val: number) => handleCommand({ command: 'reward', value: val })}
             />
           </div>

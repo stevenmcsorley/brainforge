@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { InteractiveEnvironmentProps } from './types';
+import { DK68_DEFAULT_NODES, InteractiveEnvironmentProps } from './types';
 
 // Constants for the CartPole physics simulation
 const GRAVITY = 9.8;
@@ -68,7 +68,7 @@ export default function CartPole({
 
       // 1. Read Motor Command from Brain
       // Motor nodes[0] represents pushing force. Above 0.5 pushes right, below pushes left.
-      const rawMotor = regionActivity[motorNodes[0] || 30] || 0;
+      const rawMotor = regionActivity[motorNodes[0] ?? DK68_DEFAULT_NODES.motor] || 0;
       
       // Smooth the motor response
       s.motorSmooth = s.motorSmooth * 0.8 + rawMotor * 0.2;

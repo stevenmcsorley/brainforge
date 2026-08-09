@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { InteractiveEnvironmentProps } from './types';
+import { DK68_DEFAULT_NODES, InteractiveEnvironmentProps } from './types';
 
 // The original BrainPongProps interface is replaced by InteractiveEnvironmentProps
 // interface BrainPongProps {
@@ -21,8 +21,8 @@ export default function BrainPong({
     motorNodes,
     onReward,
 }: InteractiveEnvironmentProps) {
-    const sensoryNodeIndex = sensoryNodes[0] ?? 1; // Left hemisphere early visual cortex
-    const motorNodeIndex = motorNodes[0] ?? 30;  // Left hemisphere motor cortex
+    const sensoryNodeIndex = sensoryNodes[0] ?? DK68_DEFAULT_NODES.sensory;
+    const motorNodeIndex = motorNodes[0] ?? DK68_DEFAULT_NODES.motor;
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [score, setScore] = useState({ user: 0, brain: 0 });
@@ -252,8 +252,10 @@ export default function BrainPong({
                         <div className="text-center">
                             <p className="text-text-primary mb-2 text-sm">Move mouse vertically to control paddle.</p>
                             <p className="text-text-muted max-w-sm">
-                                The ball's vertical position is injected as electrical current into the simulation's visual cortex (Node {sensoryNodeIndex}).
-                                The right paddle is driven by the real-time activity of the simulation's motor cortex (Node {motorNodeIndex}).
+                                The ball's vertical position is injected as electrical current into sensory node {sensoryNodeIndex}.
+                                The right paddle is driven by the real-time activity of motor node {motorNodeIndex}.
+                                With plasticity enabled the weights adapt, but the loop is not currently
+                                tuned to converge — see the Brain-Pong notes in the README.
                             </p>
                         </div>
                     </div>

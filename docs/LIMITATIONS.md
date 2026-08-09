@@ -13,6 +13,22 @@ This document honestly describes the current limitations and design boundaries o
 - No modelling of neurotransmitter dynamics, receptor subtypes, or neuromodulation (dopamine, serotonin, etc.)
 - No modelling of glial cells, neurovascular coupling, or metabolic constraints
 
+### Plasticity and closed-loop learning
+- The Hebbian (Oja's rule) implementation runs, but has **not** been shown to
+  learn any task. In Brain-Pong on DK68 the rally rate declines over a session
+  as weights diverge — see the Brain-Pong section of the README for measurements
+- Sensory→motor transmission is weak regardless of region choice: end-to-end
+  gain from an injected stimulus to a downstream region's activity is ~3e-4.
+  Mean-field normalisation (`w/N * coupling` ≈ 0.005 at N=68) holds total
+  per-region drive around 0.065, far below the sigmoid threshold of 0.5, so
+  the network is sustained mostly by noise rather than by coupling
+- The reward signal is additive with a 1 s decay, so bursts scale the weight
+  update by ~500× over baseline and drive weights into their clip ceiling
+- With `alpha = N` the Oja fixed point is `W* = x_pre / (N · x_post)`, the same
+  order as the initial weights, leaving little dynamic range before the reward
+  multiplier dominates
+- No claim is made that plasticity here reproduces biological synaptic learning
+
 ### Scale
 - The current backends are tested on N ≤ 68 regions (Desikan-Killiany scale)
 - Spiking backend with populations of N_pop = 50 neurons per region runs acceptably on CPU

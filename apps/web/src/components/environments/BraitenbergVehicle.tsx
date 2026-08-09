@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { InteractiveEnvironmentProps } from './types';
+import { DK68_DEFAULT_NODES, InteractiveEnvironmentProps } from './types';
 
 // Constants for the Braitenberg Vehicle physics simulation
 const MAX_SPEED = 200; // pixels per second
@@ -75,8 +75,8 @@ export default function BraitenbergVehicle({
       }
 
       // 3. Receive motor output from the brain
-      const rawLeft = regionActivity[motorNodes[0] || 30] || 0;
-      const rawRight = regionActivity[motorNodes[1] || 31] || 0;
+      const rawLeft = regionActivity[motorNodes[0] ?? DK68_DEFAULT_NODES.motor] || 0;
+      const rawRight = regionActivity[motorNodes[1] ?? DK68_DEFAULT_NODES.motor + 1] || 0;
 
       // Normalize against current min/max brain activity
       const minA = Math.min(...regionActivity) || 0;
