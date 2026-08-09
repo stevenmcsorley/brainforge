@@ -14,9 +14,17 @@ This document honestly describes the current limitations and design boundaries o
 - No modelling of glial cells, neurovascular coupling, or metabolic constraints
 
 ### Plasticity and closed-loop learning
-- The Hebbian (Oja's rule) implementation runs, but has **not** been shown to
-  learn any task. In Brain-Pong on DK68 the rally rate declines over a session
-  as weights diverge — see the Brain-Pong section of the README for measurements
+- The default `rate_based` Oja rule performs no credit assignment and has not
+  been shown to learn any task; with it, Brain-Pong rally rate declines over a
+  session as weights diverge into their clip ceiling
+- The `three_factor` backend does train on Pong tracking (see README), but this
+  is one task on one model. Nothing here demonstrates general learning ability
+- Rally rate alone is not a valid skill metric on every task variant. In a
+  predictive-interception variant, rally rose in both the plasticity-on and
+  plasticity-off arms while interception error got *worse* than a stationary
+  paddle — the physics award spin proportional to paddle offset, so extra paddle
+  motion extends rallies regardless of accuracy. Always check the metric the
+  reward actually optimises, against a do-nothing baseline
 - Sensory→motor transmission is weak regardless of region choice: end-to-end
   gain from an injected stimulus to a downstream region's activity is ~3e-4.
   Mean-field normalisation (`w/N * coupling` ≈ 0.005 at N=68) holds total

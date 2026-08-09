@@ -126,41 +126,57 @@ A live 2D Pong match wired into a running simulation:
 - The right paddle position is driven by the live activity of a **motor region** —
   `lh_precentral` (M1, index 22).
 - Paddle hits emit a `reward` command (+5.0), misses emit −2.0. With
-  `plasticity_enabled` set, this modulates an Oja's-rule update applied only to
-  existing anatomical connections.
+  `plasticity_enabled` set, this modulates a weight update applied only to
+  existing anatomical connections — Oja's rule under `rate_based`, or an
+  eligibility-trace rule under `three_factor`.
 
 Set `sensoryNodes` / `motorNodes` in the experiment's `environment` config to use
 different regions. The defaults are DK68 atlas indices and are meaningless for
 other parcellations.
 
-> **Status: the loop runs, but it does not currently learn the task.**
+> **Status: the loop trains with the `three_factor` backend; the default
+> `rate_based` Oja rule does not.**
 >
-> Measured over a 600 s run (DK68, `learning_rate` 0.05, seed 42): rally rate was
-> 16.7% (5 hits / 25 misses) and *declined* across the session — the last two
-> 15 s epochs scored zero, and mean tracking error rose from 37 to 43.
+> With `backend: "three_factor"` and the settings in
+> `python/engine/experiments/closed_loop.py`, measured on DK68 over five seeds:
+> 600 s of training, then **plasticity frozen** and evaluated on an unseen ball
+> sequence — rally rate **0.285 → 0.787** (+0.502, improved in 5/5 seeds).
+> A stationary paddle scores 0.278 and a perfect one 1.000, so the skill is
+> real and it persists with learning switched off.
 >
-> The reward accumulator is additive and decays with a 1 s time constant, so a
-> +5.0 burst scales the weight update ~500× over the 0.01 baseline. Mean weight
-> grew from 0.0064 to 0.721 (+11,000%) and then flattened, with edges pinned at
-> the `clip(0, 5.0)` ceiling; mean activity saturated near 0.97 and the motor
-> region sat at 0.9995 against the `[0, 1]` clamp. A saturated region cannot
-> encode ball position, so tracking degrades as the weights grow.
+> Against a matched plasticity-off control over seven seeds, improvement was
+> +0.504 with plasticity versus +0.209 without (difference +0.295, t = 2.94).
+> The control improves too, because the readout's normaliser warms up over a
+> session — which is exactly why the control, not the learning curve, is the
+> meaningful comparison.
 >
-> There is also a second, deeper problem: **the sensory→motor pathway barely
-> carries signal at all.** Driving the sensory region with a 2.0-amplitude square
-> wave moves the motor region by ~3e-4 in activity. That figure is essentially
-> the same for every visual→motor region pairing in DK68 — it is set by
-> mean-field normalisation (`w/N * coupling` ≈ 0.005 for N=68), which leaves the
-> network far below the sigmoid threshold, not by which regions you pick.
-> Earlier defaults (indices 1 and 30) were mislabelled as visual/motor cortex;
-> those are now corrected to real visual and motor regions, but that is a
-> labelling fix and does **not** improve transmission.
+> Three things had to be fixed together, and only one was the learning rule:
 >
-> Treat this as a demonstration of the closed-loop plumbing — stimulus in,
-> activity out, plasticity modulated by reward — not as a working learning
-> result. Making it converge needs the network gain (coupling / normalisation /
-> sigmoid threshold), the reward scaling, and the Oja decay term (`alpha = N`)
-> revisited together; all are open questions, not settled defaults.
+> - **Readout.** A single motor region's activity through an adaptive min/max
+>   normaliser scored no better than a paddle that never moves. Motor activity
+>   has a standard deviation around 0.008; min/max latches onto extremes and
+>   amplifies noise. A running z-score over a motor population fixed it. A
+>   linear decoder over unmodified activity plays a *perfect* game, which showed
+>   the information was always there and the readout was throwing it away.
+> - **Network gain.** At the defaults, mean-field normalisation
+>   (`w/N * coupling` ≈ 0.005 at N=68) leaves per-region drive near 0.065 against
+>   a sigmoid threshold of 0.5, giving end-to-end sensory→motor gain of ~3e-4.
+>   `global_coupling` 2.0 lifts the network into its responsive range.
+> - **Learning rule.** Oja's rule cannot assign credit — its modulator is a
+>   global scalar, so every eligible synapse moves together and weights grow
+>   until they clip. `three_factor` adds eligibility traces and a signed reward
+>   prediction error.
+>
+> **Brain size is not a factor.** Ball position decodes at r ≈ 0.93–0.96 on the
+> mouse connectome (N=33), DK68 (68), AAL-90 (90), Schaefer-100 (100) and
+> Schaefer-400 (400) alike; a three-variable capacity test is likewise flat.
+>
+> **This is one task on one model.** A predictive-interception variant showed
+> rally rate rising in *both* arms while interception error worsened relative to
+> a stationary paddle — the physics award spin proportional to paddle offset, so
+> paddle motion extends rallies regardless of accuracy. Rally rate is not a
+> valid skill metric everywhere; check the metric the reward actually optimises
+> against a do-nothing baseline before claiming a result.
 
 ### Compare Runs
 - Tick any completed runs (up to 5) from the run browser
