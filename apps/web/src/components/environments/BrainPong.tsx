@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 import { DK68_DEFAULT_NODES, InteractiveEnvironmentProps } from './types';
 
+/** EMA rate for the motor readout's running mean and variance. */
+const READOUT_ADAPT_RATE = 0.002;
+/** Screen units per standard deviation of motor activity. */
+const READOUT_Z_SCALE = 25;
+
 // The original BrainPongProps interface is replaced by InteractiveEnvironmentProps
 // interface BrainPongProps {
 //     runId: string;
@@ -42,45 +47,40 @@ export default function BrainPong({
     // Autonomous AI Computer controlling the left paddle
     // Handled directly perfectly in the game loop below.
 
-    // Map brain activity to brain paddle position
+    // Map brain activity to brain paddle position.
+    //
+    // Readout uses a running z-score rather than adaptive min/max bounds. Motor
+    // activity drifts slowly around a mean with a small standard deviation
+    // (~0.008 on DK68), and min/max normalisation latches onto extremes and then
+    // mostly amplifies noise — measured offline, a min/max paddle scored at
+    // roughly the level of a stationary one. Tracking mean and variance with a
+    // slow EMA and mapping z to screen position keeps the paddle centred and
+    // responsive as the operating point drifts.
     useEffect(() => {
         if (!state.current.active) return;
-        
-        const motorActivityRaw = regionActivity[motorNodeIndex] ?? 0.5;
 
-        // Initialize adaptive bounds if missing
-        if ((state.current as any).minActivity === undefined) {
-            (state.current as any).minActivity = 1.0;
-            (state.current as any).maxActivity = 0.0;
-            (state.current as any).motorActivitySmooth = motorActivityRaw; // Initialize smooth value
+        const nodes = motorNodes.length > 0 ? motorNodes : [motorNodeIndex];
+        const vals = nodes
+            .map((n) => regionActivity[n])
+            .filter((v): v is number => typeof v === 'number');
+        if (vals.length === 0) return;
+        const raw = vals.reduce((a, b) => a + b, 0) / vals.length;
+
+        const s = state.current as any;
+        if (s.motorMean === undefined) {
+            s.motorMean = raw;
+            s.motorVar = 1e-4;
         }
+        // Slow EMA so the readout adapts to drift without chasing single frames.
+        s.motorMean += READOUT_ADAPT_RATE * (raw - s.motorMean);
+        s.motorVar += READOUT_ADAPT_RATE * ((raw - s.motorMean) ** 2 - s.motorVar);
 
-        let s = state.current as any;
-        s.motorActivitySmooth = (s.motorActivitySmooth * 0.8) + (motorActivityRaw * 0.2);
-        const motorActivity = s.motorActivitySmooth;
-
-        // Update adaptive min/max bounds
-        s.minActivity = Math.min(s.minActivity, motorActivity);
-        s.maxActivity = Math.max(s.maxActivity, motorActivity);
-
-        // Only decay bounds if they are wide enough, prevents collapsing around steady-state noise which causes extreme shaking
-        const currentRange = s.maxActivity - s.minActivity;
-        if (currentRange > 0.05) {
-            s.minActivity += (motorActivity - s.minActivity) * 0.0002;
-            s.maxActivity -= (s.maxActivity - motorActivity) * 0.0002;
-        }
-
-        const range = Math.max(s.maxActivity - s.minActivity, 0.02); // minimum structural range
-        const normalized = Math.max(0, Math.min(1, (motorActivity - s.minActivity) / range));
-
-        // Map normalized activity directly to the screen height. 
-        // Ball Y is 0 (Top) to 100 (Bottom). High stimulus -> high activity -> ball at bottom (Y=~90).
-        const targetY = 10 + (normalized * 80);
+        const z = (raw - s.motorMean) / Math.max(Math.sqrt(s.motorVar), 1e-6);
+        const targetY = 50 + z * READOUT_Z_SCALE;
         const clampedY = Math.max(10, Math.min(90, targetY));
 
-        // Smooth trailing
         state.current.paddleBrain.y += (clampedY - state.current.paddleBrain.y) * 0.15;
-    }, [regionActivity, motorNodeIndex]);
+    }, [regionActivity, motorNodeIndex, motorNodes]);
 
     // Game Loop
     useEffect(() => {
