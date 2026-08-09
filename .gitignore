@@ -18,3 +18,8 @@ storage/
 .turbo/
 coverage/
 *.tsbuildinfo
+
+# Large generated Schaefer-1000 datasets — reproduce with
+# scripts/generate-schaefer1000-data.py rather than committing 24MB of
+# derived matrices.
+datasets/schaefer_1000_*.csv

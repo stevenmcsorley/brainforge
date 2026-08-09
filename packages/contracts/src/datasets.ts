@@ -26,6 +26,10 @@ export const CreateDatasetSchema = z.object({
   description: z.string().optional(),
   format: DatasetFormatSchema,
   source: z.string().optional(),
+  regionCount: z.number().int().positive().optional(),
+  fileSize: z.number().int().nonnegative().optional(),
+  checksum: z.string().optional(),
+  storagePath: z.string().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 

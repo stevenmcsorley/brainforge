@@ -38,6 +38,10 @@ export class DatasetsService {
         description: data.description,
         format: data.format,
         source: data.source,
+        regionCount: data.regionCount,
+        fileSize: data.fileSize,
+        checksum: data.checksum,
+        storagePath: data.storagePath,
         metadata: (data.metadata ?? undefined) as any,
       },
     });
