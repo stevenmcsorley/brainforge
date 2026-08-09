@@ -23,12 +23,23 @@ This document honestly describes the current limitations and design boundaries o
   0.94x the network-average rate and many weights saturate at the clip ceiling,
   so the gain is better described as a broad shift in network excitability that
   suits the readout than as a learned sensorimotor pathway
-- Rally rate alone is not a valid skill metric on every task variant. In a
-  predictive-interception variant, rally rose in both the plasticity-on and
-  plasticity-off arms while interception error got *worse* than a stationary
-  paddle — the physics award spin proportional to paddle offset, so extra paddle
-  motion extends rallies regardless of accuracy. Always check the metric the
-  reward actually optimises, against a do-nothing baseline
+- **Predictive control is not learned.** On the de-confounded
+  `PredictivePongEnv` (baselines: stationary 0.078, position-tracking 0.205,
+  velocity extrapolation 0.915), five seeds of 600 s training evaluated with
+  plasticity frozen gave +0.000 rally improvement with plasticity on versus
+  +0.033 with it off (difference −0.033, t = −1.76). The control also improved
+  more on interception error (−0.040 vs −0.008). Final performance ~0.10 sits
+  between doing nothing and tracking, far below extrapolation
+- This is a clean negative, not a null: position, velocity and landing point are
+  all linearly decodable from network activity (r = 0.968, 0.965, 0.934), so the
+  task is solvable in principle and the limit is the learning rule. A single
+  global scalar gating every eligible synapse can shift network excitability —
+  which is what produced the tracking gain — but cannot sculpt a structured
+  input→output mapping such as `landing = f(position, velocity)`
+- Rally rate alone is not a valid skill metric on every task variant. Before
+  trusting a learning curve, score the task with
+  `engine.experiments.pong_env.policy_baselines()` and check that a do-nothing
+  policy is weak and a flailing one earns nothing
 - Sensory→motor transmission is weak regardless of region choice: end-to-end
   gain from an injected stimulus to a downstream region's activity is ~3e-4.
   Mean-field normalisation (`w/N * coupling` ≈ 0.005 at N=68) holds total

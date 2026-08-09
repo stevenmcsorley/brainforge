@@ -182,12 +182,20 @@ other parcellations.
 > mouse connectome (N=33), DK68 (68), AAL-90 (90), Schaefer-100 (100) and
 > Schaefer-400 (400) alike; a three-variable capacity test is likewise flat.
 >
-> **This is one task on one model.** A predictive-interception variant showed
-> rally rate rising in *both* arms while interception error worsened relative to
-> a stationary paddle — the physics award spin proportional to paddle offset, so
-> paddle motion extends rallies regardless of accuracy. Rally rate is not a
-> valid skill metric everywhere; check the metric the reward actually optimises
-> against a do-nothing baseline before claiming a result.
+> **A harder task is not learned.** On `PredictivePongEnv` — spin removed,
+> ball hidden past mid-court so the paddle must extrapolate from velocity —
+> five seeds of 600 s training evaluated with plasticity frozen gave **+0.000**
+> rally improvement with plasticity on, against **+0.033** with it off
+> (difference −0.033, t = −1.76). Final performance ~0.10 against baselines of
+> 0.078 (stationary), 0.205 (position tracking) and 0.915 (extrapolation).
+>
+> This is a clean negative rather than a null result: position, velocity and the
+> landing point are all linearly decodable from network activity
+> (r = 0.968, 0.965, 0.934), so the information is present and the task is
+> solvable — the limit is the rule. One global scalar gating every eligible
+> synapse can move the network's operating point, which is what produced the
+> tracking gain, but cannot build a structured mapping like
+> `landing = f(position, velocity)`.
 
 ### Compare Runs
 - Tick any completed runs (up to 5) from the run browser
